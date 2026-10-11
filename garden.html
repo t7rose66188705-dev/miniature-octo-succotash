@@ -66,10 +66,6 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .wallet small { font-size: 13px; font-weight: 400; color: var(--ink-soft); }
 .coin { width: 20px; height: 20px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #ffe7a0, #e0a92a 60%, #b07d12); box-shadow: inset 0 0 0 2px #c8921b; }
 .ctl-row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; align-items: center; }
-.music { border: 1px solid var(--line); background: var(--surface); border-radius: 99px; padding: 7px 14px; display: inline-flex; gap: 6px; align-items: center; }
-.music:hover:not(:disabled) { border-color: var(--accent); }
-.music:disabled { opacity: .5; cursor: default; }
-.music svg { width: 16px; height: 16px; }
 .next { border: 0; border-radius: 99px; padding: 8px 18px; background: var(--ink); color: var(--bg); font-weight: 600; letter-spacing: .06em; }
 .next:hover { background: color-mix(in oklab, var(--ink) 85%, var(--accent)); }
 
@@ -104,10 +100,17 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .bar b { font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; color: var(--ink); }
 .track { position: relative; height: 7px; border-radius: 7px; background: var(--surface-2); overflow: hidden; }
 .track i { position: absolute; inset: 0 auto 0 0; border-radius: 7px; transition: width .4s; }
-.track .band { position: absolute; top: 0; bottom: 0; border-left: 1px dashed color-mix(in oklab, var(--ink) 40%, transparent); border-right: 1px dashed color-mix(in oklab, var(--ink) 40%, transparent); }
+.track .band { position: absolute; top: 0; bottom: 0; background: color-mix(in oklab, var(--ink) 10%, transparent); border-left: 1px dashed color-mix(in oklab, var(--ink) 40%, transparent); border-right: 1px dashed color-mix(in oklab, var(--ink) 40%, transparent); }
 .bar.water i { background: var(--water); } .bar.nutr i { background: var(--nutr); } .bar.soil i { background: var(--soil); }
 .bar.light i { background: var(--sun); } .bar.heart i { background: var(--heart); } .bar.grow i { background: var(--grow); }
-.bar.over b { color: var(--warn); }
+.bar.off b { color: var(--nutr); }
+.bar.off.g2 b, .bar.off.g3 b { color: var(--warn); }
+.status.sub { color: var(--ink-soft); font-size: 12.5px; margin-top: -4px; }
+.care-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 6px; border-radius: 12px; background: color-mix(in oklab, var(--heart) 10%, var(--surface)); }
+.item p.rng { font-size: 11.5px; font-variant-numeric: tabular-nums; }
+.guide summary { font-family: var(--font-display); font-size: 20px; letter-spacing: .08em; cursor: pointer; }
+.guide p { margin: 8px 0 0; font-size: 13px; color: var(--ink-soft); max-width: 65ch; }
+.guide b { color: var(--ink); }
 .status { margin: 0; font-size: 13px; min-height: 1.55em; }
 .status.bad { color: var(--warn); }
 .acts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
@@ -185,7 +188,6 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     <div class="side-ctl">
       <div class="wallet"><span class="coin" aria-hidden="true"></span><span id="gold">500</span><small>金币</small></div>
       <div class="ctl-row">
-        <button class="music" id="music"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/></svg><span id="musiclbl">放首歌</span></button>
         <button class="next" id="next">睡一觉 · 下一天</button>
       </div>
     </div>
@@ -213,6 +215,13 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
         <p class="shop-hint" id="shophint"></p>
         <div class="items" id="items"></div>
       </section>
+      <details class="panel guide">
+        <summary>健康怎么算</summary>
+        <p>每株植物的水分、肥力、松软、光照都有自己的<b>合适区间</b>，就是进度条上虚线框住的那一段。比如水量适中的植物，水分要在 60–80 之间。</p>
+        <p>每晚睡觉时结算一次：四项都在区间里，健康 <b>+5</b>；哪一项偏出去一点 <b>−2</b>，偏得多 <b>−6</b>，到极端（干透、积水、烧根）<b>−12</b>。多了少了都扣。耐旱的植物怕水多，喜湿的怕干，耐阴的怕晒，这几种情况扣得更重。</p>
+        <p>霜冻会冻伤阳台上的植物：不耐寒的 −12，耐寒的 −4，屋里的不受影响。深秋（秋 5 日以后）开始可能下霜。</p>
+        <p>每株每天可以陪伴一次（摸一摸或听首歌），健康随机 +3~8。卡片上的“今晚”一行会提前告诉你结算结果。</p>
+      </details>
       <section class="panel">
         <div class="sec-head"><h2>园艺日记</h2></div>
         <ol class="log" id="log"></ol>
@@ -236,20 +245,31 @@ const pick = arr => arr[Math.floor(Math.random() * arr.length)];
 const SEASONS = ['春', '夏', '秋', '冬'];
 const DAYS_PER_SEASON = 7;
 const NEED = {
-  xlow: { label: '极耐旱', mul: 0.4, range: [10, 50] },
-  low:  { label: '耐旱', mul: 0.6, range: [20, 65] },
-  mid:  { label: '水量适中', mul: 1.0, range: [35, 80] },
-  high: { label: '喜湿', mul: 1.3, range: [50, 95] },
+  xlow: { label: '极耐旱', mul: 0.4, range: [15, 40] },
+  low:  { label: '耐旱', mul: 0.7, range: [25, 55] },
+  mid:  { label: '水量适中', mul: 1.0, range: [60, 80] },
+  high: { label: '喜湿', mul: 1.25, range: [70, 90] },
 };
 const LIGHT = {
-  sun:   { label: '喜阳', range: [60, 100] },
+  sun:   { label: '喜阳', range: [55, 100] },
   half:  { label: '半阴', range: [35, 80] },
-  shade: { label: '耐阴', range: [15, 60] },
+  shade: { label: '耐阴', range: [15, 55] },
 };
+const FEED = {
+  light:  { label: '少肥', range: [15, 50], decay: 3 },
+  normal: { label: '中等', range: [35, 75], decay: 4 },
+  heavy:  { label: '喜肥', range: [50, 85], decay: 5 },
+};
+const SOIL_RANGE = [40, 85];
+// how far outside the ideal range still counts as "a little off" (−2); beyond that is "off" (−6); extremes are −12
+const MARGIN = { water: 15, nutr: 15, soil: 15, light: 25 };
+const PENALTY = [0, 2, 6, 12];
 const WX_LIGHT = { '晴': 85, '多云': 55, '小雨': 30, '雷阵雨': 20, '高温': 100, '雪': 35, '霜冻': 75 };
 const SEASON_LIGHT = [0, 5, 0, -10];
 const SEASON_DRY = [1, 1.3, 1.1, 0.6];
-const WATER_ADD = 35, DRAIN = 40, FERT_ADD = 30, SOIL_ADD = 40, FERT_COST = 8, NUTR_DECAY = 4;
+const WATER_DECAY = 12, WATER_ADD = 20, DRAIN = 30, FERT_ADD = 30, SOIL_ADD = 35, FERT_COST = 8;
+const HEAVY_FEEDERS = ['rose', 'sunflower', 'hydrangea', 'peach', 'lemon'];
+const LIGHT_FEEDERS = ['lavender', 'foxtail', 'snake', 'podocarpus'];
 
 const POTS = {
   clay:    { name: '陶土盆', price: 60,  dry: 1,    compact: 1,   grow: 1,    sell: 1,    desc: '透气好，最朴素也最可靠。' },
@@ -298,7 +318,10 @@ const PLANTS = [
   { id: 'lemon', name: '柠檬树', cat: 'tree', form: 'tree', shape: 'round', lf: 'oval', bark: [30, 18, 34], leaves: [[110, 45, 34], [112, 48, 30], [112, 45, 30], [115, 40, 28]], blossom: { color: [50, 80, 97], seasons: [0] }, fruit: { color: [52, 88, 58], seasons: [2, 3], kind: 'lemon' }, price: 220, sell: 660, days: 30, need: 'mid', light: 'sun', grow: [0, 1], hardy: false, show: 2, note: '春天开香香的白花，秋冬挂满黄澄澄的柠檬。怕冻。' },
   { id: 'pomegranate', name: '石榴', cat: 'tree', form: 'tree', shape: 'round', lf: 'narrow', bark: [20, 22, 30], leaves: [[90, 45, 45], [105, 45, 33], [45, 75, 50], null], blossom: { color: [8, 80, 52], seasons: [1] }, fruit: { color: [355, 65, 45], seasons: [2], kind: 'pom' }, price: 230, sell: 680, days: 32, need: 'low', light: 'sun', grow: [1, 2], hardy: true, show: 2, note: '夏天开火红的花，秋天结出咧嘴笑的石榴。' },
 ];
+PLANTS.forEach(p => { p.feed = HEAVY_FEEDERS.includes(p.id) ? 'heavy' : (p.cat === 'succ' || LIGHT_FEEDERS.includes(p.id)) ? 'light' : 'normal'; });
 const SP = Object.fromEntries(PLANTS.map(p => [p.id, p]));
+const idealOf = sp => ({ water: NEED[sp.need].range, nutr: FEED[sp.feed].range, soil: SOIL_RANGE, light: LIGHT[sp.light].range });
+const mid = r => Math.round((r[0] + r[1]) / 2);
 
 const WX_TABLE = [
   [['晴', 45], ['多云', 25], ['小雨', 30]],
@@ -306,6 +329,7 @@ const WX_TABLE = [
   [['晴', 50], ['多云', 30], ['小雨', 20]],
   [['晴', 35], ['多云', 30], ['雪', 22], ['霜冻', 13]],
 ];
+const LATE_AUTUMN = [['晴', 45], ['多云', 25], ['小雨', 15], ['霜冻', 15]]; // 霜降 after the 5th day of autumn
 const TEMP = [[10, 22], [25, 33], [13, 24], [-3, 8]];
 const SEASON_TIPS = [
   '立春了。万物抽芽，正是长个子的时候。',
@@ -321,15 +345,15 @@ let state;
 function freshState() {
   return {
     day: 0, gold: 500, slots: 4, pots: [null, null, null, null],
-    weather: '晴', temp: 16, forecast: '多云', ftemp: 15, seq: 1, dex: {}, musicDay: -1,
+    weather: '晴', temp: 16, forecast: '多云', ftemp: 15, seq: 1, dex: {},
     log: [{ d: 0, t: '欢迎来到清清的阳台。先去花市挑一个花盆，再挑一株幼苗吧。' }],
     tab: 'pots', target: -1,
   };
 }
 function migrate(s) {
   if (!s || typeof s.day !== 'number') return null;
-  s.forecast = s.forecast || '晴'; s.ftemp = s.ftemp ?? 16; s.musicDay = s.musicDay ?? -1;
-  s.pots = s.pots.map(p => p && { type: p.type, indoor: !!p.indoor, used: p.used ?? !!p.plant, plant: p.plant && SP[p.plant.sp] ? { darkDays: 0, ...p.plant } : null });
+  s.forecast = s.forecast || '晴'; s.ftemp = s.ftemp ?? 16;
+  s.pots = s.pots.map(p => p && { type: p.type, indoor: !!p.indoor, used: p.used ?? !!p.plant, plant: p.plant && SP[p.plant.sp] ? { ...p.plant } : null });
   delete s.speed; delete s.clock;
   return s;
 }
@@ -382,24 +406,65 @@ function stageName(pl, sp) {
   if (pl.progress < 70) return '生长期';
   return sp.cat === 'tree' ? '小树' : (sp.bloom ? '花苞期' : '快长大了');
 }
+// grade one value against its ideal range: 0 ideal, 1 a little off, 2 off, 3 extreme
+function grade(val, [lo, hi], m, exLo, exHi) {
+  if (val >= lo && val <= hi) return [0, 0];
+  const low = val < lo, d = low ? lo - val : val - hi;
+  let g = d <= m ? 1 : 2;
+  if ((low && val <= exLo) || (!low && val >= exHi)) g = 3;
+  return [g, low ? -1 : 1];
+}
+const DIMS = [
+  { k: 'water', name: '水分', exLo: 5, exHi: 100.5, low: ['有点干', '缺水', '干透了'], high: ['偏湿', '太湿', '积水烂根'] },
+  { k: 'nutr', name: '肥力', exLo: 5, exHi: 100.5, low: ['肥力偏低', '缺肥发黄', '严重缺肥'], high: ['肥偏多', '肥太多', '烧根'] },
+  { k: 'soil', name: '松软', exLo: 8, exHi: 999, low: ['土有点紧', '土壤板结', '板结闷根'], high: ['松得太勤', '伤到细根', '伤根'] },
+  { k: 'light', name: '光照', exLo: -1, exHi: 999, low: ['光线偏暗', '光照不足', '几乎不见光'], high: ['光线偏强', '太晒了', '晒伤'] },
+];
+function evaluate(slot, season = seasonOf(state.day), weather = state.weather) {
+  const pl = slot.plant, sp = SP[pl.sp], I = idealOf(sp);
+  const vals = { water: pl.water, nutr: pl.nutr, soil: pl.soil, light: lightAt(slot.indoor, weather, season) };
+  const issues = [], grades = {};
+  let dh = 0, q = 0;
+  for (const D of DIMS) {
+    if (D.k === 'light' && dormant(sp, season)) { grades.light = 0; q += 1; continue; }
+    const [g, dir] = grade(vals[D.k], I[D.k], MARGIN[D.k], D.exLo, D.exHi);
+    grades[D.k] = g; q += [1, 0.7, 0.35, 0][g];
+    if (!g) continue;
+    let pen = PENALTY[g];
+    if (D.k === 'water' && dir > 0 && (sp.need === 'xlow' || sp.need === 'low')) pen *= 1.5;
+    if (D.k === 'water' && dir < 0 && sp.need === 'high') pen *= 1.5;
+    if (D.k === 'light' && dir > 0 && sp.light === 'shade') pen *= 1.5;
+    pen = Math.round(pen);
+    dh -= pen;
+    issues.push({ k: D.k, g, dir, pen, text: (dir < 0 ? D.low : D.high)[g - 1] });
+  }
+  if (!issues.length) dh = 5;
+  return { dh, issues, grades, q: q / 4, vals };
+}
+// what tomorrow's forecast will do to a plant left where it is
+function forecastWarn(slot) {
+  if (slot.indoor || !slot.plant || slot.plant.dead) return '';
+  const pl = slot.plant, sp = SP[pl.sp], f = state.forecast;
+  if (f === '霜冻') return sp.hardy ? (dormant(sp, seasonOf(state.day + 1)) ? '' : '明天打霜，它会冻伤一点（健康 −4）。') : '明天打霜，它不耐寒，搬进屋吧（否则健康 −12）。';
+  if (f === '小雨' || f === '雷阵雨') {
+    const after = pl.water - WATER_DECAY * NEED[sp.need].mul + (f === '小雨' ? 22 : 32);
+    if (after > NEED[sp.need].range[1] + 5) return `明天有${f}，土会太湿，可以先搬进屋。`;
+  }
+  if (f === '高温' && sp.light !== 'sun') return '明天高温暴晒，它怕晒，可以先搬进屋。';
+  return '';
+}
 function statusOf(slot) {
   const pl = slot.plant, sp = SP[pl.sp];
-  const [lo, hi] = NEED[sp.need].range, [llo, lhi] = LIGHT[sp.light].range, L = slotLight(slot);
-  if (pl.dead) return ['枯萎了……把它铲掉，花盆还能再用。', true];
-  if (pl.water > 100) return ['盆里积水了！倒掉积水，或者搬进屋避雨。', true];
-  if (pl.water < 10) return ['土干透了，叶子都蔫了，快浇水！', true];
-  if (pl.nutr > 100) return ['肥下多了，有点烧根。', true];
-  if (L > lhi + 15) return ['太晒了，叶子要晒伤，搬进屋躲一躲。', true];
-  if (pl.health < 35) return ['看起来很虚弱，要好好照顾。', true];
-  if (L < llo - 20 && !dormant(sp, seasonOf(state.day))) return [pl.darkDays >= 2 ? '一直不见光，开始徒长发黄了。' : slot.indoor ? '屋里太暗了，它想晒太阳。' : '今天天色暗，光照不太够。', pl.darkDays >= 2];
-  if (pl.water < lo) return ['有点渴了。', false];
-  if (pl.nutr < 15) return ['叶子发黄，缺肥了。', false];
-  if (pl.soil < 20) return ['土壤板结了，松松土吧。', false];
-  if (pl.water > hi) return ['土还湿着，今天先别浇。', false];
-  const s = seasonOf(state.day);
-  if (pl.matured) return [isBlooming(pl, sp, s) ? '正是最好看的时候，卖价更高。' : '已经长大了，可以拿去卖。', false];
-  if (s === 3 && !sp.grow.includes(3)) return ['冬天长得慢，耐心一点。', false];
-  return ['长得不错，精神很好。', false];
+  if (pl.dead) return { main: '枯萎了……把它铲掉，花盆还能再用。', bad: true, extra: '' };
+  const ev = evaluate(slot);
+  let main;
+  if (ev.issues.length) {
+    const worst = ev.issues.slice().sort((a, b) => b.pen - a.pen).map(x => x.text).join('、');
+    main = `今晚 健康 ${ev.dh}：${worst}`;
+  } else main = pl.health >= 100 ? '今晚 各项刚好，健康满格' : `今晚 健康 +5：各项刚好`;
+  let extra = forecastWarn(slot);
+  if (!extra && pl.matured) extra = isBlooming(pl, sp, seasonOf(state.day)) ? '正是最好看的时候，卖价更高。' : '已经长大了，可以拿去卖。';
+  return { main, bad: ev.dh <= -6, extra, ev };
 }
 
 /* ================= actions ================= */
@@ -445,7 +510,7 @@ function buyPlant(id) {
   if (state.gold < sp.price) return toast('金币不够。');
   state.gold -= sp.price;
   const slot = state.pots[idx];
-  slot.plant = { sp: id, id: state.seq++, progress: 0, health: 100, water: sp.need === 'xlow' ? 35 : 60, nutr: 50, soil: 70, done: {}, age: 0, matured: false, dead: false, darkDays: 0 };
+  slot.plant = { sp: id, id: state.seq++, progress: 0, health: 100, water: mid(NEED[sp.need].range), nutr: mid(FEED[sp.feed].range), soil: 65, done: {}, age: 0, matured: false, dead: false };
   slot.used = true;
   state.target = -1;
   let extra = '';
@@ -456,7 +521,6 @@ function buyPlant(id) {
   toast(extra ? `${sp.name}种好了。${extra}` : `${sp.name}种好了。浇水前先看看水分条。`);
 }
 function act(i, kind) {
-  if (kind === 'pet') return pet(i);
   const slot = state.pots[i]; if (!slot || !slot.plant) return;
   const pl = slot.plant, sp = SP[pl.sp];
   if (pl.dead || pl.done[kind]) return;
@@ -470,8 +534,9 @@ function act(i, kind) {
     if (pl.nutr > 100) toast('肥料下得太猛了。');
   } else if (kind === 'soil') {
     pl.soil = Math.min(100, pl.soil + SOIL_ADD);
+    if (pl.soil > SOIL_RANGE[1]) toast('土本来就挺松的，再松会碰伤细根。');
   } else if (kind === 'drain') {
-    if (pl.water <= 55) return;
+    if (pl.water <= 30) return;
     pl.water = Math.max(0, pl.water - DRAIN);
     toast(`把${sp.name}的盆斜过来，倒掉了多余的水。`);
   } else if (kind === 'move') {
@@ -482,21 +547,33 @@ function act(i, kind) {
   addFx(i, kind);
   commit();
 }
-function pet(i) {
+let careOpen = -1;
+function tap(i) {
+  const slot = state.pots[i]; if (!slot || !slot.plant) return;
+  if (slot.plant.sp === 'mimosa') slot.plant.touched = performance.now();
+  wiggles[i] = performance.now();
+}
+function care(i, kind) {
   const slot = state.pots[i]; if (!slot || !slot.plant) return;
   const pl = slot.plant, sp = SP[pl.sp];
-  if (sp.id === 'mimosa') pl.touched = performance.now();
-  wiggles[i] = performance.now();
-  if (pl.dead || pl.done.pet) return;
-  const gain = 3 + Math.floor(Math.random() * 6);
-  const before = pl.health;
+  careOpen = -1;
+  if (pl.dead || pl.done.care) return render();
+  const gain = 3 + Math.floor(Math.random() * 6), before = pl.health;
   pl.health = Math.min(100, pl.health + gain);
-  pl.done.pet = true;
-  addFx(i, 'heart');
-  const line = sp.id === 'mimosa' ? '叶子害羞地合上了，过一会儿又慢慢张开。'
-    : (sp.id === 'cactusball' || sp.id === 'opuntia') ? '小心扎手！不过它好像挺开心。'
-    : sp.id === 'bearpaw' ? '毛茸茸的，像在握小熊的手。'
-    : pick(PET_LINES);
+  pl.done.care = true;
+  wiggles[i] = performance.now();
+  let line;
+  if (kind === 'music') {
+    playTune(); addFx(i, 'notes');
+    line = pick(['叶子跟着节奏轻轻晃。', '它好像很喜欢这首歌。', '安安静静地听完了一整首。']);
+  } else {
+    addFx(i, 'heart');
+    if (sp.id === 'mimosa') pl.touched = performance.now();
+    line = sp.id === 'mimosa' ? '叶子害羞地合上了，过一会儿又慢慢张开。'
+      : (sp.id === 'cactusball' || sp.id === 'opuntia') ? '小心扎手！不过它好像挺开心。'
+      : sp.id === 'bearpaw' ? '毛茸茸的，像在握小熊的手。'
+      : pick(PET_LINES);
+  }
   toast(before >= 100 ? `${line}（它已经很健康了）` : `${line} 健康 +${pl.health - before}`);
   commit();
 }
@@ -519,18 +596,6 @@ function playTune() {
       t += dur;
     }
   } catch (e) {}
-}
-function music() {
-  if (state.musicDay === state.day) return;
-  const living = state.pots.map((s, i) => [s, i]).filter(([s]) => s && s.plant && !s.plant.dead);
-  playTune();
-  state.musicDay = state.day;
-  if (!living.length) { toast('你放了一首歌，可惜阳台上还没有听众。'); commit(); return; }
-  let total = 0;
-  living.forEach(([s, i]) => { const g = 2 + Math.floor(Math.random() * 5); const b = s.plant.health; s.plant.health = Math.min(100, b + g); total += s.plant.health - b; addFx(i, 'notes'); wiggles[i] = performance.now(); });
-  addLog('给植物们放了一首歌，大家都跟着晃了起来。');
-  toast(`叶子们跟着节奏晃起来了。一共恢复了 ${total} 点健康。`);
-  commit();
 }
 function sell(i) {
   const slot = state.pots[i]; if (!slot || !slot.plant || !slot.plant.matured || slot.plant.dead) return;
@@ -556,15 +621,16 @@ function expand() {
   addLog(`花 ${c} 金币扩建了阳台，现在能放 ${state.slots} 盆。`);
   commit();
 }
-function rollWeather(season) {
-  const tbl = WX_TABLE[season];
+function rollWeather(day) {
+  const season = seasonOf(day);
+  const tbl = season === 2 && day % DAYS_PER_SEASON >= 4 ? LATE_AUTUMN : WX_TABLE[season];
   let r = Math.random() * tbl.reduce((a, b) => a + b[1], 0);
   for (const [w, p] of tbl) { if ((r -= p) <= 0) return w; }
   return tbl[0][0];
 }
 function rollTemp(season, w) {
   if (w === '高温') return 35 + Math.floor(Math.random() * 4);
-  if (w === '霜冻') return -6 + Math.floor(Math.random() * 5);
+  if (w === '霜冻') return season === 2 ? -1 + Math.floor(Math.random() * 3) : -6 + Math.floor(Math.random() * 5);
   const [a, b] = TEMP[season];
   return a + Math.floor(Math.random() * (b - a + 1)) - (w === '雪' ? 4 : 0);
 }
@@ -575,30 +641,12 @@ function nextDay() {
   state.pots.forEach((slot) => {
     if (!slot || !slot.plant || slot.plant.dead) return;
     const pl = slot.plant, sp = SP[pl.sp], pot = POTS[slot.type], need = NEED[sp.need];
-    const [lo, hi] = need.range, [llo, lhi] = LIGHT[sp.light].range;
-    const sleep = dormant(sp, season), L = slotLight(slot);
-    // judge the day with today's care
-    const wq = pl.water > 100 ? 0.2 : pl.water < 10 ? 0 : (pl.water >= lo && pl.water <= hi) ? 1 : 0.55;
-    const nq = pl.nutr > 100 ? 0.4 : pl.nutr >= 30 ? 1 : pl.nutr >= 12 ? 0.6 : 0.3;
-    const sq = pl.soil >= 40 ? 1 : pl.soil >= 20 ? 0.7 : 0.4;
-    const lq = sleep || (L >= llo && L <= lhi) ? 1 : (L >= llo - 20 && L <= lhi + 15) ? 0.6 : 0.3;
-    const q = wq * 0.35 + nq * 0.2 + sq * 0.2 + lq * 0.25;
-    let dh = 0;
-    if (pl.water > 100) dh -= 6 + (pl.water - 100) * 0.4;
-    else if (pl.water < 10) dh -= 14;
-    else if ((sp.need === 'low' || sp.need === 'xlow') && pl.water > hi + 10) dh -= 5;
-    else if (sp.need === 'high' && pl.water < lo - 15) dh -= 4;
-    if (pl.nutr > 100) dh -= 10; else if (pl.nutr < 10) dh -= 4;
-    if (pl.soil < 15) dh -= 3;
-    if (L > lhi + 15) dh -= 5;
-    pl.darkDays = !sleep && L < llo - 20 ? (pl.darkDays || 0) + 1 : 0;
-    if (pl.darkDays >= 3) dh -= 4;
-    if (dh === 0 && q >= 0.75) dh = 6;
-    pl.health = clamp(pl.health + dh, 0, 100);
+    const ev = evaluate(slot, season, state.weather);
+    pl.health = clamp(pl.health + ev.dh, 0, 100);
     if (pl.health <= 0) { pl.dead = true; notes.push(`${sp.name}没能撑过去，枯萎了。`); return; }
     if (!pl.matured) {
       const sf = sp.grow.includes(season) ? 1.15 : season === 3 ? 0.4 : 0.85;
-      const g = q * sf * pot.grow * (0.5 + 0.5 * pl.health / 100) * 100 / sp.days;
+      const g = ev.q * sf * pot.grow * (0.5 + 0.5 * pl.health / 100) * 100 / sp.days;
       pl.progress = Math.min(100, pl.progress + g);
       if (pl.progress >= 100) {
         pl.matured = true;
@@ -608,31 +656,39 @@ function nextDay() {
       }
     }
     pl.age++;
-    const hot = (!slot.indoor && state.weather === '高温') ? 1.5 : 1;
-    pl.water = Math.max(0, pl.water - 22 * need.mul * SEASON_DRY[season] * pot.dry * hot * (slot.indoor ? 0.8 : 1));
-    pl.nutr = Math.max(0, pl.nutr - NUTR_DECAY);
+    const hot = (!slot.indoor && state.weather === '高温') ? 1.4 : 1;
+    pl.water = Math.max(0, pl.water - WATER_DECAY * need.mul * SEASON_DRY[season] * pot.dry * hot * (slot.indoor ? 0.8 : 1));
+    pl.nutr = Math.max(0, pl.nutr - FEED[sp.feed].decay);
     pl.soil = Math.max(0, pl.soil - 9 * pot.compact);
     pl.done = {};
   });
   state.day++;
+  careOpen = -1;
   const ns = seasonOf(state.day);
   if (ns !== season) { notes.unshift(SEASON_TIPS[ns]); if (ns === 0) notes.unshift(`新的一年，第 ${yearOf(state.day)} 年开始了。`); }
   state.weather = state.forecast; state.temp = state.ftemp;
-  state.forecast = rollWeather(seasonOf(state.day + 1));
+  state.forecast = rollWeather(state.day + 1);
   state.ftemp = rollTemp(seasonOf(state.day + 1), state.forecast);
   const outside = state.pots.filter(s => s && s.plant && !s.plant.dead && !s.indoor);
   if (state.weather === '小雨' || state.weather === '雷阵雨') {
-    const add = state.weather === '小雨' ? 28 : 38, what = state.weather === '小雨' ? '下了场小雨' : '一场雷阵雨';
+    const add = state.weather === '小雨' ? 22 : 32, what = state.weather === '小雨' ? '下了场小雨' : '一场雷阵雨';
     outside.forEach(s => s.plant.water = Math.min(130, s.plant.water + add));
-    const soaked = outside.filter(s => s.plant.water > 100).map(s => SP[s.plant.sp].name);
-    if (soaked.length) notes.push(`${what}，${[...new Set(soaked)].join('、')}的盆里积水了。可以倒掉积水，或者搬进屋。`);
-    else if (outside.length) notes.push(`${what}，阳台上的盆土都喝饱了水。`);
+    const soaked = outside.filter(s => s.plant.water > NEED[SP[s.plant.sp].need].range[1]).map(s => SP[s.plant.sp].name);
+    if (soaked.length) notes.push(`${what}，${[...new Set(soaked)].join('、')}的土太湿了。可以倒掉积水，或者搬进屋。`);
+    else if (outside.length) notes.push(`${what}，阳台上的盆土都喝了些水。`);
   } else if (state.weather === '雪') {
-    outside.forEach(s => s.plant.water = Math.min(130, s.plant.water + 8));
+    outside.forEach(s => s.plant.water = Math.min(130, s.plant.water + 6));
   } else if (state.weather === '霜冻') {
     const hurt = [];
-    outside.forEach(s => { if (!SP[s.plant.sp].hardy) { s.plant.health = Math.max(1, s.plant.health - 10); hurt.push(SP[s.plant.sp].name); } });
-    if (hurt.length) notes.push(`夜里打霜，阳台上的${[...new Set(hurt)].join('、')}冻着了。`);
+    outside.forEach(s => {
+      const sp = SP[s.plant.sp];
+      if (dormant(sp, ns)) return;
+      const loss = sp.hardy ? 4 : 12;
+      s.plant.health = Math.max(1, s.plant.health - loss); hurt.push(`${sp.name} −${loss}`);
+    });
+    const name = ns === 2 ? '霜降了，夜里结了霜' : '夜里打霜';
+    if (hurt.length) notes.push(`${name}，阳台上的植物冻着了：${hurt.join('、')}。`);
+    else notes.push(`${name}，好在怕冷的都在屋里。`);
   } else if (state.weather === '高温' && outside.length) {
     notes.push('今天高温，阳台上的水干得特别快。');
   }
@@ -1410,7 +1466,6 @@ function visOf(pl, sp) {
   let y = (1 - pl.health / 100) * 0.8;
   if (pl.nutr < 15) y += 0.35;
   if (pl.water > 100) y += 0.25;
-  if ((pl.darkDays || 0) >= 3) y += 0.2;
   let droop = pl.water < Math.min(15, lo) ? 0.25 + (15 - pl.water) / 15 * 0.65 : pl.water < lo - 12 ? 0.15 : 0;
   if (pl.dead) { y = 1; droop = 1; }
   return { y: Math.min(1, y), droop: clamp(droop, 0, 1), dead: pl.dead };
@@ -1501,7 +1556,7 @@ function canvasFor(i) {
   if (!canvases[i]) {
     const cv = document.createElement('canvas');
     cv.setAttribute('role', 'img');
-    cv.addEventListener('click', () => pet(i));
+    cv.addEventListener('click', () => tap(i));
     canvases[i] = cv;
   }
   return canvases[i];
@@ -1520,6 +1575,8 @@ const ICON = {
   pet: '<svg viewBox="0 0 24 24" fill="none" stroke="var(--heart)" stroke-width="1.8" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="var(--heart)" fill-opacity=".2"/></svg>',
   home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 11l8-7 8 7v9H4z" fill="currentColor" fill-opacity=".1"/><path d="M10 20v-5h4v5"/></svg>',
   sun: '<svg viewBox="0 0 24 24" fill="none" stroke="var(--sun)" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4" fill="var(--sun)" fill-opacity=".25"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.4 1.4M17.6 17.6 19 19M5 19l1.4-1.4M17.6 6.4 19 5"/></svg>',
+  music: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/></svg>',
+  back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 7 4 12l5 5"/><path d="M4 12h11a5 5 0 0 1 0 10h-2"/></svg>',
   drain: '<svg viewBox="0 0 24 24" fill="none" stroke="var(--water)" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="M3 9l11-4 2.5 8.5L7 16z" fill="var(--water)" fill-opacity=".12"/><path d="M18 14c0 2 1.2 3 1.2 4a1.2 1.2 0 0 1-2.4 0c0-1 1.2-2 1.2-4z" fill="var(--water)"/></svg>',
 };
 
@@ -1540,10 +1597,10 @@ function render() {
   fc.textContent = `明天 ${state.forecast} ${state.ftemp}°C`;
   fc.classList.toggle('alert', ALERT_WX.includes(state.forecast));
   fc.title = state.forecast === '小雨' || state.forecast === '雷阵雨' ? '怕涝的植物可以提前搬进屋' : state.forecast === '霜冻' ? '不耐寒的植物今晚搬进屋' : '';
+  if (state.forecast === '霜冻') fc.textContent += ' · 怕冷的搬进屋';
   $('gold').textContent = state.gold;
-  const mb = $('music'); mb.disabled = state.musicDay === state.day; $('musiclbl').textContent = mb.disabled ? '今天听过歌了' : '放首歌';
   const used = state.pots.filter(Boolean).length;
-  $('slotinfo').textContent = `${used} / ${state.slots} 格 · 点植物可以摸摸它`;
+  $('slotinfo').textContent = `${used} / ${state.slots} 格`;
   const ex = $('expand');
   if (state.slots >= 10) { ex.textContent = '阳台已经最大'; ex.disabled = true; }
   else { ex.textContent = `扩建 +2 格 · ${expandCost()} 金`; ex.disabled = state.gold < expandCost(); }
@@ -1569,18 +1626,20 @@ function render() {
         <p class="status">${POTS[slot.type].desc}</p>
         <div class="pair"><button class="wide" data-plant="${i}">种点什么</button><button class="wide soft" data-sellpot="${i}">卖掉 · ${potRefund(slot)} 金</button></div>`;
     } else {
-      const pl = slot.plant, sp = SP[pl.sp], need = NEED[sp.need], lt = LIGHT[sp.light];
-      const stage = stageName(pl, sp), [st, bad] = statusOf(slot), L = slotLight(slot);
-      cv.setAttribute('aria-label', `${sp.name}，${stage}，点一下摸摸它`);
+      const pl = slot.plant, sp = SP[pl.sp], need = NEED[sp.need], lt = LIGHT[sp.light], I = idealOf(sp);
+      const stage = stageName(pl, sp), st = statusOf(slot);
+      cv.setAttribute('aria-label', `${sp.name}，${stage}`);
       const chip = document.createElement('span');
       chip.className = 'chip' + (pl.dead ? ' dead' : pl.matured ? ' ripe' : '');
       chip.textContent = stage; wrap.append(chip);
       const age = document.createElement('span'); age.className = 'age'; age.textContent = `第 ${pl.age + 1} 天`; wrap.append(age);
+      const gr = st.ev ? st.ev.grades : {}, cls = k => gr[k] ? ` off g${gr[k]}` : '';
+      const L = lightAt(slot.indoor, state.weather, seasonOf(state.day));
       const bars = [
-        barHTML('water' + (pl.water > 100 ? ' over' : ''), '水分', pl.water, 100, need.range),
-        barHTML('nutr' + (pl.nutr > 100 ? ' over' : ''), '肥力', pl.nutr, 100),
-        barHTML('soil', '松软', pl.soil, 100),
-        barHTML('light' + (L > lt.range[1] + 15 || L < lt.range[0] - 20 ? ' over' : ''), '光照', L, 100, lt.range),
+        barHTML('water' + cls('water'), '水分', pl.water, 100, I.water),
+        barHTML('nutr' + cls('nutr'), '肥力', pl.nutr, 100, I.nutr),
+        barHTML('soil' + cls('soil'), '松软', pl.soil, 100, I.soil),
+        barHTML('light' + cls('light'), '光照', L, 100, I.light),
         barHTML('heart', '健康', pl.health, 100),
         barHTML('grow', '成长', pl.progress, 100, null, Math.floor(pl.progress) + '%'),
       ].join('');
@@ -1590,18 +1649,23 @@ function render() {
         const d = pl.done;
         const b = (kind, icon, label, doneLabel, extra = '', dis = false) =>
           `<button class="act" data-act="${kind}" data-i="${i}" ${d[kind] || dis ? 'disabled' : ''}>${icon}${d[kind] ? doneLabel : label}${extra}</button>`;
+        const careBtn = `<button class="act" data-careopen="${i}" ${d.care ? 'disabled' : ''} aria-expanded="${careOpen === i}">${ICON.pet}${d.care ? '陪过了' : '陪伴'}</button>`;
+        const careRow = careOpen === i && !d.care ? `<div class="care-row">
+            <button class="act" data-care="pet" data-i="${i}">${ICON.pet}摸一摸</button>
+            <button class="act" data-care="music" data-i="${i}">${ICON.music}听首歌</button>
+            <button class="act" data-careopen="${i}">${ICON.back}算了</button></div>` : '';
         tail = `<div class="acts">
           ${b('water', ICON.water, '浇水', '浇过了')}
           ${b('fert', ICON.fert, '施肥', '施过了', d.fert ? '' : `<span class="cost">${FERT_COST} 金</span>`, state.gold < FERT_COST)}
           ${b('soil', ICON.soil, '松土', '松过了')}
-          ${b('pet', ICON.pet, '摸摸', '摸过了')}
+          ${careBtn}
           ${b('move', slot.indoor ? ICON.sun : ICON.home, slot.indoor ? '搬到阳台' : '搬进屋', '今天搬过了')}
-          ${b('drain', ICON.drain, '倒积水', '倒过了', '', pl.water <= 55)}
-        </div>` + (pl.matured ? `<button class="wide" data-sell="${i}">出售 · ${sellPrice(slot)} 金</button>` : '');
+          ${b('drain', ICON.drain, '倒积水', '倒过了', '', pl.water <= 30)}
+        </div>${careRow}` + (pl.matured ? `<button class="wide" data-sell="${i}">出售 · ${sellPrice(slot)} 金</button>` : '');
       }
       info.innerHTML = `<div class="name-row"><h3>${sp.name}</h3><span>${POTS[slot.type].name} · ${need.label} · ${lt.label}</span></div>
         <div class="bars">${bars}</div>
-        <p class="status${bad ? ' bad' : ''}">${st}</p>${tail}`;
+        <p class="status${st.bad ? ' bad' : ''}">${st.main}</p>${st.extra ? `<p class="status sub">${st.extra}</p>` : ''}${tail}`;
     }
     card.append(wrap, info);
     grid.append(card);
@@ -1642,6 +1706,7 @@ function renderShop() {
     const cv = document.createElement('canvas'); cv.width = 148; cv.height = 162;
     el.innerHTML = `<div class="tx"><div class="t1"><strong>${sp.name}</strong><span class="tag">${NEED[sp.need].label}</span><span class="tag">${LIGHT[sp.light].label}</span>${state.dex[sp.id] ? '<span class="tag got">已养成</span>' : ''}</div>
       <p>${sp.note}</p>
+      <p class="rng">${(() => { const I = idealOf(sp); return `水 ${I.water.join('–')} · 肥 ${I.nutr.join('–')} · 光 ${I.light.join('–')}`; })()}</p>
       <div class="t3"><span>约 ${sp.days} 天长成 · 卖 ${sp.sell} 金起</span><button class="buy" data-buyplant="${sp.id}" ${potIdx < 0 || state.gold < sp.price ? 'disabled' : ''}>${sp.price} 金</button></div></div>`;
     el.prepend(cv); items.append(el);
     const season = sp.show ?? (sp.bloom ? sp.bloom[0] : sp.id === 'foxtail' ? 2 : 1);
@@ -1684,9 +1749,10 @@ document.addEventListener('click', e => {
   else if (b.dataset.plant) { state.target = +b.dataset.plant; if (state.tab === 'pots') state.tab = 'flower'; render(); $('shop').scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' }); }
   else if (b.dataset.go) { state.tab = b.dataset.go; render(); $('shop').scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' }); }
   else if (b.dataset.tab) { state.tab = b.dataset.tab; render(); }
+  else if (b.dataset.care) { care(+b.dataset.i, b.dataset.care); }
+  else if (b.dataset.careopen) { careOpen = careOpen === +b.dataset.careopen ? -1 : +b.dataset.careopen; render(); }
 });
 $('next').addEventListener('click', nextDay);
-$('music').addEventListener('click', music);
 $('expand').addEventListener('click', expand);
 let resetArmed = 0;
 $('reset').addEventListener('click', () => {
