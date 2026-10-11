@@ -12,11 +12,13 @@
   --sky-low: #fbefd9;
   --orb: #ffd98a;
   --city: #d9cdb8;
-  --leaf-dark: #2f4a2a;
-  --leaf-light: #557a3c;
+  --leaf-dark: #22381f;
+  --leaf-mid: #3a5a2e;
+  --leaf-light: #8aab4e;
   --curb: #c9c2b2;
   --walk: #ddd5c4;
   --scent: #e3a52a;
+  --haze: #ffd45e;
   --line: #d3d6c4;
   --chip: #f8f8f1;
   --font-display: "ZCOOL XiaoWei", "Noto Serif SC", "Songti SC", serif;
@@ -26,15 +28,15 @@
   :root:not([data-theme="light"]) {
     --bg: #141812; --ink: #ece6d2; --ink-soft: #a9a68f;
     --sky-top: #141a2a; --sky-low: #2c2f3a; --orb: #f3e6b8; --city: #23262c;
-    --leaf-dark: #142312; --leaf-light: #2d4826; --curb: #3b3c38; --walk: #2a2b27;
-    --scent: #f2c45a; --line: #2c3228; --chip: #1c211a; color-scheme: dark;
+    --leaf-dark: #0f1b0e; --leaf-mid: #1f3319; --leaf-light: #4b6a35; --curb: #3b3c38; --walk: #2a2b27;
+    --scent: #f2c45a; --haze: #f6cf63; --line: #2c3228; --chip: #1c211a; color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #141812; --ink: #ece6d2; --ink-soft: #a9a68f;
   --sky-top: #141a2a; --sky-low: #2c2f3a; --orb: #f3e6b8; --city: #23262c;
-  --leaf-dark: #142312; --leaf-light: #2d4826; --curb: #3b3c38; --walk: #2a2b27;
-  --scent: #f2c45a; --line: #2c3228; --chip: #1c211a; color-scheme: dark;
+  --leaf-dark: #0f1b0e; --leaf-mid: #1f3319; --leaf-light: #4b6a35; --curb: #3b3c38; --walk: #2a2b27;
+  --scent: #f2c45a; --haze: #f6cf63; --line: #2c3228; --chip: #1c211a; color-scheme: dark;
 }
 html, body { height: 100%; }
 body { background: var(--bg); color: var(--ink); font-family: var(--font-body); }
@@ -99,6 +101,7 @@ button[aria-pressed="true"] { border-color: var(--ink); }
   let W = 0, H = 0, DPR = 1, groundY = 0;
   let C = {};
   let shrubs = [], falling = [], wisps = [], motes = [], buildings = [];
+  let hedge = null, puffSprite = null;
   let ground, gctx;
   let fallen = 0;
   let wind = 0, windTarget = 0;
@@ -110,7 +113,7 @@ button[aria-pressed="true"] { border-color: var(--ink); }
 
   function readColors() {
     const s = getComputedStyle(document.documentElement);
-    const keys = ['sky-top','sky-low','orb','city','leaf-dark','leaf-light','curb','walk','scent','ink'];
+    const keys = ['sky-top','sky-low','orb','city','leaf-dark','leaf-mid','leaf-light','curb','walk','scent','haze','ink'];
     keys.forEach(k => C[k] = s.getPropertyValue('--' + k).trim());
     isDark = s.getPropertyValue('color-scheme').includes('dark');
   }
@@ -142,78 +145,150 @@ button[aria-pressed="true"] { border-color: var(--ink); }
     c.restore();
   }
 
-  function drawLeaf(c, x, y, len, rot, col) {
+  // osmanthus leaf: short, elliptic, pointed, slightly glossy
+  function drawLeaf(c, x, y, len, rot, col, gloss) {
     c.save();
     c.translate(x, y); c.rotate(rot);
     c.fillStyle = col;
     c.beginPath();
     c.moveTo(0, 0);
-    c.quadraticCurveTo(len * 0.5, -len * 0.2, len, 0);
-    c.quadraticCurveTo(len * 0.5, len * 0.2, 0, 0);
+    c.bezierCurveTo(len * 0.25, -len * 0.3, len * 0.75, -len * 0.26, len, 0);
+    c.bezierCurveTo(len * 0.75, len * 0.26, len * 0.25, len * 0.3, 0, 0);
     c.fill();
-    c.strokeStyle = 'rgba(255,255,255,0.08)';
-    c.lineWidth = 0.6;
-    c.beginPath(); c.moveTo(len * 0.05, 0); c.lineTo(len * 0.9, 0); c.stroke();
+    if (gloss) {
+      c.fillStyle = gloss;
+      c.beginPath();
+      c.ellipse(len * 0.45, -len * 0.07, len * 0.22, len * 0.06, 0, 0, Math.PI * 2);
+      c.fill();
+    }
     c.restore();
   }
 
   // ---------- scene build ----------
+  // A street osmanthus: short trunk forking into a round, dense crown built from
+  // overlapping leaf clumps, lit from the sun's side (upper right).
   function buildShrub(cx, r) {
-    const w = Math.ceil(r * 2.5), h = Math.ceil(r * 2.6);
+    const w = Math.ceil(r * 2.7), h = Math.ceil(r * 2.9);
     const off = document.createElement('canvas');
     off.width = w * DPR; off.height = h * DPR;
     const c = off.getContext('2d');
     c.scale(DPR, DPR);
     const ox = w / 2, base = h - 4;
+    const cy = base - r * 1.62, rx = r * 1.0, ry = r * 0.82;
 
-    // trunk
-    c.strokeStyle = isDark ? '#2a2119' : '#5b4632';
-    c.lineCap = 'round';
-    c.lineWidth = Math.max(4, r * 0.09);
-    c.beginPath(); c.moveTo(ox, base); c.quadraticCurveTo(ox - r * 0.05, base - r * 0.6, ox + r * 0.02, base - r * 1.0); c.stroke();
-    c.lineWidth *= 0.6;
-    c.beginPath(); c.moveTo(ox, base - r * 0.45); c.lineTo(ox - r * 0.4, base - r * 1.05); c.stroke();
-    c.beginPath(); c.moveTo(ox, base - r * 0.55); c.lineTo(ox + r * 0.45, base - r * 1.1); c.stroke();
-
-    // canopy: dense glossy leaves in a dome
-    const cy = base - r * 1.25;
-    // dark mass behind the leaves so the canopy reads as dense, not see-through
-    for (let i = 0; i < 9; i++) {
-      c.fillStyle = mix(C['leaf-dark'], C['leaf-light'], rand(0, 0.25));
+    // trunk and main limbs, tapered
+    const bark = isDark ? '#2b241d' : '#5a4a3a';
+    c.fillStyle = bark;
+    const tw = Math.max(5, r * 0.1);
+    c.beginPath();
+    c.moveTo(ox - tw * 0.75, base);
+    c.quadraticCurveTo(ox - tw * 0.4, base - r * 0.5, ox - tw * 0.35, cy + ry * 0.5);
+    c.lineTo(ox + tw * 0.35, cy + ry * 0.5);
+    c.quadraticCurveTo(ox + tw * 0.45, base - r * 0.5, ox + tw * 0.75, base);
+    c.closePath(); c.fill();
+    c.strokeStyle = bark; c.lineCap = 'round';
+    for (const [dx, lw] of [[-0.55, 0.55], [0.5, 0.5], [0.05, 0.45]]) {
+      c.lineWidth = tw * lw;
       c.beginPath();
-      c.ellipse(ox + rand(-r * 0.45, r * 0.45), cy + rand(-r * 0.35, r * 0.4), r * rand(0.45, 0.65), r * rand(0.4, 0.55), 0, 0, Math.PI * 2);
-      c.fill();
-    }
-    const leafCount = Math.round(r * 5.5);
-    const leaves = [];
-    for (let i = 0; i < leafCount; i++) {
-      const a = rand(0, Math.PI * 2), d = Math.sqrt(Math.random());
-      const lx = ox + Math.cos(a) * d * r * 1.05;
-      const ly = cy + Math.sin(a) * d * r * 0.9;
-      leaves.push({ lx, ly, d, a });
-    }
-    leaves.sort((p, q) => p.ly - q.ly);
-    for (const L of leaves) {
-      const shade = Math.min(1, Math.max(0, 0.75 - (L.ly - cy) / (r * 1.6) + rand(-0.25, 0.25)));
-      const col = mix(C['leaf-dark'], C['leaf-light'], shade);
-      drawLeaf(c, L.lx, L.ly, rand(r * 0.16, r * 0.26), L.a + rand(-0.6, 0.6), col);
+      c.moveTo(ox, cy + ry * 0.55);
+      c.quadraticCurveTo(ox + dx * r * 0.3, cy + ry * 0.2, ox + dx * r * 0.7, cy - ry * 0.15);
+      c.stroke();
     }
 
-    // flower clusters tucked in leaf axils
+    // clumps that together make an oval crown
+    const clumps = [{ x: 0, y: 0.05, s: 0.62 }];
+    const ring = 8;
+    for (let i = 0; i < ring; i++) {
+      const a = (i / ring) * Math.PI * 2 + rand(-0.2, 0.2);
+      clumps.push({ x: Math.cos(a) * 0.55, y: Math.sin(a) * 0.5 + 0.05, s: rand(0.4, 0.5) });
+    }
+    clumps.push({ x: rand(-0.2, 0.2), y: -0.62, s: 0.4 });
+    for (const k of clumps) { k.x = ox + k.x * rx; k.y = cy + k.y * ry; k.s *= r; }
+    clumps.sort((p, q) => p.y - q.y);
+
+    const dark = C['leaf-dark'], mid = C['leaf-mid'], light = C['leaf-light'];
+    const gloss = hexA(isDark ? '#9fb79a' : '#e8f2d6', isDark ? 0.12 : 0.28);
+
+    for (const k of clumps) {
+      const low = Math.min(1, Math.max(0, (k.y - (cy - ry)) / (2 * ry)));
+      // shadow, body, sunlit side
+      c.fillStyle = dark;
+      c.beginPath(); c.arc(k.x - k.s * 0.06, k.y + k.s * 0.1, k.s, 0, Math.PI * 2); c.fill();
+      c.fillStyle = mix(mid, dark, low * 0.55);
+      c.beginPath(); c.arc(k.x, k.y, k.s * 0.9, 0, Math.PI * 2); c.fill();
+      const hl = c.createRadialGradient(k.x + k.s * 0.35, k.y - k.s * 0.4, 0, k.x + k.s * 0.35, k.y - k.s * 0.4, k.s * 0.85);
+      hl.addColorStop(0, hexA(light, 0.95 - low * 0.5)); hl.addColorStop(1, hexA(light, 0));
+      c.fillStyle = hl;
+      c.beginPath(); c.arc(k.x, k.y, k.s * 0.9, 0, Math.PI * 2); c.fill();
+
+      // leaves fringing the clump edge, drooping slightly, plus a few on its face
+      const n = Math.round(k.s * 1.5);
+      for (let i = 0; i < n; i++) {
+        const a = rand(0, Math.PI * 2);
+        const edge = Math.random() < 0.7;
+        const d = edge ? rand(0.7, 0.95) : rand(0.1, 0.65);
+        const lx = k.x + Math.cos(a) * k.s * d, ly = k.y + Math.sin(a) * k.s * d;
+        const sun = (Math.cos(a) * 0.6 - Math.sin(a) * 0.8 + 1) / 2;
+        const col = mix(mix(dark, mid, 0.4 + rand(-0.2, 0.2)), light, sun * (edge ? 0.75 : 0.45) * (1 - low * 0.6));
+        const rot = edge ? a + 0.35 * Math.sin(Math.PI / 2 - a) + rand(-0.35, 0.35) : rand(0, 6.28);
+        drawLeaf(c, lx, ly, rand(r * 0.12, r * 0.17), rot, col, sun > 0.55 ? gloss : null);
+      }
+    }
+
+    // flower clusters, tucked in among the leaves
     const pal = VARIETIES[variety];
     const spots = [];
-    const clusters = Math.round(r * 0.75);
+    const clusters = Math.round(r * 0.7);
     for (let i = 0; i < clusters; i++) {
-      const a = rand(0, Math.PI * 2), d = Math.sqrt(Math.random()) * 0.95;
-      const fx = ox + Math.cos(a) * d * r * 1.0;
-      const fy = cy + Math.sin(a) * d * r * 0.85;
-      const n = (rand(5, 12)) | 0;
+      const a = rand(0, Math.PI * 2), d = Math.sqrt(Math.random()) * 0.8;
+      const fx = ox + Math.cos(a) * d * rx;
+      const fy = cy + Math.sin(a) * d * ry;
+      const n = (rand(4, 10)) | 0;
+      c.fillStyle = hexA(dark, 0.35);
+      c.beginPath(); c.ellipse(fx, fy + 2, 7, 4, 0, 0, Math.PI * 2); c.fill();
       for (let k = 0; k < n; k++) {
-        drawFlower(c, fx + rand(-6, 6), fy + rand(-5, 5), rand(1.6, 2.8), rand(0, 6.28), pick(pal), rand(0.75, 1));
+        drawFlower(c, fx + rand(-5, 5), fy + rand(-4, 4), rand(1.2, 2.0), rand(0, 6.28), pick(pal), rand(0.8, 1));
       }
       spots.push({ x: fx - ox, y: fy - base });
     }
     return { off, w, h, cx, base: groundY, r, spots, shake: 0, shakeV: 0, phase: rand(0, 6.28), ox, by: base };
+  }
+
+  // the low clipped hedge that runs along the curb, in front of the trunks
+  function buildHedge() {
+    const hh = Math.max(26, H * 0.06);
+    const off = document.createElement('canvas');
+    off.width = W * DPR; off.height = (hh + 20) * DPR;
+    const c = off.getContext('2d');
+    c.scale(DPR, DPR);
+    const top = 10;
+    const g = c.createLinearGradient(0, top, 0, top + hh);
+    g.addColorStop(0, C['leaf-mid']); g.addColorStop(1, C['leaf-dark']);
+    c.fillStyle = g;
+    c.beginPath();
+    c.moveTo(0, top + hh);
+    for (let x = 0; x <= W + 14; x += 14) c.quadraticCurveTo(x - 7, top - rand(2, 7), x, top + rand(0, 3));
+    c.lineTo(W, top + hh); c.closePath(); c.fill();
+    for (let i = 0; i < W * 0.9; i++) {
+      const x = rand(0, W), y = top + rand(0, hh);
+      const up = 1 - (y - top) / hh;
+      c.fillStyle = hexA(Math.random() < up * 0.7 ? C['leaf-light'] : C['leaf-dark'], rand(0.25, 0.6));
+      c.beginPath(); c.ellipse(x, y, rand(1.5, 3), rand(0.8, 1.5), rand(0, 3.14), 0, Math.PI * 2); c.fill();
+    }
+    hedge = { off, h: hh + 20, top };
+  }
+
+  // a soft scent puff, pre-rendered once per theme
+  function buildPuffSprite() {
+    const s = 128;
+    puffSprite = document.createElement('canvas');
+    puffSprite.width = puffSprite.height = s;
+    const c = puffSprite.getContext('2d');
+    const g = c.createRadialGradient(s / 2, s / 2, 0, s / 2, s / 2, s / 2);
+    g.addColorStop(0, hexA(C.haze, 1));
+    g.addColorStop(0.35, hexA(C.haze, 0.55));
+    g.addColorStop(1, hexA(C.haze, 0));
+    c.fillStyle = g; c.fillRect(0, 0, s, s);
   }
 
   function buildScene() {
@@ -238,9 +313,11 @@ button[aria-pressed="true"] { border-color: var(--ink); }
     const n = Math.max(3, Math.round(W / span));
     for (let i = 0; i < n; i++) {
       const cx = (i + 0.5) * (W / n) + rand(-18, 18);
-      const r = rand(W < 520 ? 48 : 62, W < 520 ? 64 : 88);
+      const r = rand(W < 520 ? 46 : 60, W < 520 ? 58 : 80);
       shrubs.push(buildShrub(cx, r));
     }
+    buildHedge();
+    buildPuffSprite();
 
     ground = document.createElement('canvas');
     ground.width = W * DPR; ground.height = H * DPR;
@@ -253,7 +330,7 @@ button[aria-pressed="true"] { border-color: var(--ink); }
       drawFlower(gctx, s.cx + rand(-s.r * 1.4, s.r * 1.4), rand(groundY + 10, H - 8), rand(2, 3), rand(0, 6.28), pick(VARIETIES[variety]), 0.85);
     }
 
-    motes = Array.from({ length: reduce ? 20 : 60 }, () => ({
+    motes = Array.from({ length: reduce ? 12 : 30 }, () => ({
       x: rand(0, W), y: rand(H * 0.1, groundY), r: rand(0.8, 2.2), p: rand(0, 6.28), s: rand(0.2, 0.6)
     }));
   }
@@ -261,6 +338,8 @@ button[aria-pressed="true"] { border-color: var(--ink); }
   function rebuildShrubsOnly() {
     readColors();
     shrubs = shrubs.map(s => buildShrub(s.cx, s.r));
+    buildHedge();
+    buildPuffSprite();
   }
 
   // ---------- particles ----------
@@ -279,11 +358,13 @@ button[aria-pressed="true"] { border-color: var(--ink); }
     });
   }
 
-  function spawnWisp(x, y) {
+  // scent: a cloud of a few soft puffs that swells, drifts and thins out
+  function spawnWisp(x, y, big = 1) {
+    const parts = Array.from({ length: 4 }, () => ({ dx: rand(-0.5, 0.5), dy: rand(-0.35, 0.35), s: rand(0.55, 1) }));
     wisps.push({
-      pts: [{ x, y }], x, y,
-      vx: rand(-6, 6), vy: rand(-22, -10),
-      life: 0, max: rand(6, 11), seed: rand(0, 100), w: rand(10, 26),
+      x, y, vx: rand(-5, 5), vy: rand(-12, -6),
+      life: 0, max: rand(5, 9), seed: rand(0, 100),
+      size: rand(50, 95) * big, parts,
     });
   }
 
@@ -338,6 +419,7 @@ button[aria-pressed="true"] { border-color: var(--ink); }
       ctx.drawImage(s.off, -s.ox, -s.by, s.w, s.h);
       ctx.restore();
     }
+    ctx.drawImage(hedge.off, 0, groundY + 6 - hedge.h, W, hedge.h);
   }
 
   function drawWisps(dt, t) {
@@ -346,42 +428,55 @@ button[aria-pressed="true"] { border-color: var(--ink); }
     for (let i = wisps.length - 1; i >= 0; i--) {
       const w = wisps[i];
       w.life += dt;
-      const flow = Math.sin(w.y * 0.012 + t * 0.7 + w.seed) * 14 + Math.cos(w.x * 0.008 + t * 0.4) * 8;
-      let ax = flow + wind * 0.9, ay = -4;
-      if (pointer.active) {
-        const dx = pointer.x - w.x, dy = pointer.y - w.y, d = Math.hypot(dx, dy);
-        if (d < 260) { ax += dx / d * 40 * (1 - d / 260); ay += dy / d * 40 * (1 - d / 260); }
-      }
-      w.vx += (ax - w.vx) * dt * 0.8;
-      w.vy += (ay - w.vy * 0.3) * dt * 0.5;
-      w.x += w.vx * dt; w.y += w.vy * dt;
-      w.pts.push({ x: w.x, y: w.y });
-      if (w.pts.length > 46) w.pts.shift();
       const k = w.life / w.max;
-      const a = Math.sin(Math.min(1, k) * Math.PI) * (isDark ? 0.16 : 0.22);
-      if (k >= 1 || w.y < -40) { wisps.splice(i, 1); continue; }
-      ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-      for (let pass = 0; pass < 2; pass++) {
-        ctx.strokeStyle = hexA(C.scent, pass ? a : a * 0.35);
-        ctx.lineWidth = pass ? w.w * 0.18 : w.w;
-        ctx.beginPath();
-        const p = w.pts;
-        ctx.moveTo(p[0].x, p[0].y);
-        for (let j = 1; j < p.length - 1; j++) {
-          ctx.quadraticCurveTo(p[j].x, p[j].y, (p[j].x + p[j + 1].x) / 2, (p[j].y + p[j + 1].y) / 2);
-        }
-        ctx.stroke();
+      if (k >= 1 || w.y < -120) { wisps.splice(i, 1); continue; }
+      const flow = Math.sin(w.y * 0.01 + t * 0.5 + w.seed) * 8;
+      let ax = flow + wind * 0.9, ay = -6;
+      if (pointer.active) {
+        const dx = pointer.x - w.x, dy = pointer.y - w.y, d = Math.hypot(dx, dy) || 1;
+        if (d < 280) { const f = 30 * (1 - d / 280); ax += dx / d * f; ay += dy / d * f; }
+      }
+      w.vx += (ax - w.vx) * dt * 0.6;
+      w.vy += (ay - w.vy) * dt * 0.4;
+      w.x += w.vx * dt; w.y += w.vy * dt;
+      // swell as it rises, fade in then out
+      const size = w.size * (0.55 + k * 0.9);
+      const a = Math.sin(k * Math.PI) * (isDark ? 0.14 : 0.32);
+      ctx.globalAlpha = a;
+      for (const p of w.parts) {
+        const ps = size * p.s;
+        const px = w.x + p.dx * size + Math.sin(t * 0.6 + w.seed + p.dx * 5) * 4;
+        const py = w.y + p.dy * size;
+        ctx.drawImage(puffSprite, px - ps * 0.7, py - ps * 0.5, ps * 1.4, ps);
+      }
+      // the odd twinkle shed by the cloud
+      if (Math.random() < dt * 1.2 && motes.length < 140) {
+        motes.push({ x: w.x + rand(-size * 0.4, size * 0.4), y: w.y + rand(-size * 0.25, size * 0.25), r: rand(1.2, 2.4), p: rand(0, 6.28), s: rand(0.3, 0.7), life: 0, max: rand(2, 4) });
       }
     }
-    // drifting pollen motes
-    for (const m of motes) {
-      m.p += dt * m.s;
-      m.x += (Math.sin(m.p * 2) * 6 + wind * 0.6) * dt;
-      m.y += Math.cos(m.p) * 4 * dt - 3 * dt;
+    ctx.globalAlpha = 1;
+    // twinkles: tiny four-point glints that drift with the scent
+    for (let i = motes.length - 1; i >= 0; i--) {
+      const m = motes[i];
+      m.p += dt * m.s * 3;
+      if (m.max) { m.life += dt; if (m.life > m.max) { motes.splice(i, 1); continue; } }
+      m.x += (Math.sin(m.p * 0.7) * 5 + wind * 0.6) * dt;
+      m.y -= 5 * dt;
+      if (pointer.active) {
+        const dx = pointer.x - m.x, dy = pointer.y - m.y, d = Math.hypot(dx, dy) || 1;
+        if (d < 200) { m.x += dx / d * 18 * dt; m.y += dy / d * 18 * dt; }
+      }
       if (m.x > W + 10) m.x = -10; if (m.x < -10) m.x = W + 10;
-      if (m.y < H * 0.05) m.y = groundY;
-      ctx.fillStyle = hexA(C.scent, 0.35 + 0.35 * Math.sin(m.p * 3));
-      ctx.beginPath(); ctx.arc(m.x, m.y, m.r, 0, Math.PI * 2); ctx.fill();
+      if (m.y < H * 0.05) m.y = groundY - rand(0, 60);
+      const fade = m.max ? Math.sin(Math.min(1, m.life / m.max) * Math.PI) : 1;
+      const tw = (0.5 + 0.5 * Math.sin(m.p)) * fade;
+      if (tw < 0.05) continue;
+      const L = m.r * (1.5 + tw * 2);
+      ctx.fillStyle = hexA(C.scent, 0.35 + 0.5 * tw);
+      ctx.beginPath();
+      ctx.moveTo(m.x, m.y - L); ctx.quadraticCurveTo(m.x, m.y, m.x + L, m.y);
+      ctx.quadraticCurveTo(m.x, m.y, m.x, m.y + L); ctx.quadraticCurveTo(m.x, m.y, m.x - L, m.y);
+      ctx.quadraticCurveTo(m.x, m.y, m.x, m.y - L); ctx.fill();
     }
     ctx.restore();
   }
@@ -418,11 +513,11 @@ button[aria-pressed="true"] { border-color: var(--ink); }
 
     spawnAcc += dt * (reduce ? 1.5 : 4 + Math.abs(wind) * 0.12);
     while (spawnAcc > 1) { spawnAcc--; spawnFlower(pick(shrubs)); }
-    wispAcc += dt * (reduce ? 0.4 : 1.1);
+    wispAcc += dt * (reduce ? 0.3 : 0.8);
     while (wispAcc > 1) {
       wispAcc--;
       const s = pick(shrubs);
-      spawnWisp(s.cx + rand(-s.r * 0.7, s.r * 0.7), groundY - s.r * rand(1.4, 2.0));
+      spawnWisp(s.cx + rand(-s.r * 0.7, s.r * 0.7), groundY - s.r * rand(1.7, 2.3));
     }
 
     ctx.clearRect(0, 0, W, H);
@@ -439,18 +534,18 @@ button[aria-pressed="true"] { border-color: var(--ink); }
   function shakeAt(x, y) {
     let hit = null, best = Infinity;
     for (const s of shrubs) {
-      const d = Math.hypot(x - s.cx, (y - (groundY - s.r * 1.3)) * 0.8);
+      const d = Math.hypot(x - s.cx, (y - (groundY - s.r * 1.55)) * 0.9);
       if (d < s.r * 1.3 && d < best) { best = d; hit = s; }
     }
     if (!hit) {
       // clicked the sky or street: send a puff of scent from there
-      for (let i = 0; i < 3; i++) spawnWisp(x + rand(-20, 20), y + rand(-10, 10));
+      spawnWisp(x, y, 1.2);
       return;
     }
     hit.shakeV += (x < hit.cx ? 1 : -1) * 0.9;
     const n = reduce ? 15 : 45;
     for (let i = 0; i < n; i++) spawnFlower(hit, true);
-    for (let i = 0; i < 4; i++) spawnWisp(hit.cx + rand(-hit.r * 0.6, hit.r * 0.6), groundY - hit.r * rand(1.2, 1.9));
+    for (let i = 0; i < 3; i++) spawnWisp(hit.cx + rand(-hit.r * 0.6, hit.r * 0.6), groundY - hit.r * rand(1.5, 2.2));
     hintEl.style.opacity = '0';
   }
 
