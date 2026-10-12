@@ -1,0 +1,1953 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}[hidden]{display:none!important}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
+<title>四季盆栽</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Noto+Serif+SC:wght@400;600;700&display=swap">
+<style>
+/* Layout: a season header (big season glyph + date/forecast + wallet), then a balcony grid of pot cards beside a shop / diary column */
+:root {
+  --bg: #edf0e8;
+  --surface: #f9faf5;
+  --surface-2: #e3e8dc;
+  --ink: #26301f;
+  --ink-soft: #66705c;
+  --line: #d2d9c9;
+  --water: #3f86c2;
+  --nutr: #c38a22;
+  --soil: #8b6646;
+  --sun: #e0a21c;
+  --heart: #cf4f66;
+  --grow: #4f9a48;
+  --warn: #c2462f;
+  --indoor: #f1e6d4;
+  --spring: #d2668f;
+  --summer: #3b8f55;
+  --autumn: #c9801f;
+  --winter: #5f84ad;
+  --accent: var(--spring);
+  --font-display: "ZCOOL KuaiLe", "Noto Serif SC", "PingFang SC", serif;
+  --font-body: "Noto Serif SC", "Songti SC", "SimSun", serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #141913; --surface: #1d241b; --surface-2: #283126; --ink: #e9ecdf; --ink-soft: #a3ab96; --line: #313b2e;
+    --water: #6eaee3; --nutr: #e2ad49; --soil: #b8916c; --sun: #f0c04e; --heart: #ee7d91; --grow: #7cc072; --warn: #f07a60; --indoor: #2c271f;
+    --spring: #ee93b5; --summer: #6cc184; --autumn: #eaa649; --winter: #91b2d8; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #141913; --surface: #1d241b; --surface-2: #283126; --ink: #e9ecdf; --ink-soft: #a3ab96; --line: #313b2e;
+  --water: #6eaee3; --nutr: #e2ad49; --soil: #b8916c; --sun: #f0c04e; --heart: #ee7d91; --grow: #7cc072; --warn: #f07a60; --indoor: #2c271f;
+  --spring: #ee93b5; --summer: #6cc184; --autumn: #eaa649; --winter: #91b2d8; color-scheme: dark;
+}
+body[data-season="0"] { --accent: var(--spring); }
+body[data-season="1"] { --accent: var(--summer); }
+body[data-season="2"] { --accent: var(--autumn); }
+body[data-season="3"] { --accent: var(--winter); }
+
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 14px; line-height: 1.55; transition: background .6s; }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.app { max-width: 1200px; margin: 0 auto; padding-inline: 16px; padding-block: 16px 40px; display: grid; gap: 18px; }
+
+/* ---------- header ---------- */
+.top { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 14px 22px; align-items: center;
+  padding: 16px 20px; border-radius: 18px; background: color-mix(in oklab, var(--accent) 13%, var(--surface)); border: 1px solid color-mix(in oklab, var(--accent) 25%, var(--line)); transition: background .6s, border-color .6s; }
+.glyph { font-family: var(--font-display); font-size: 64px; line-height: 1; color: var(--accent); width: 72px; text-align: center; transition: color .6s; }
+.when { display: grid; gap: 6px; min-width: 0; }
+.when h1 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 26px; letter-spacing: .06em; text-wrap: balance; }
+.when h1 small { font-family: var(--font-body); font-size: 13px; color: var(--ink-soft); letter-spacing: .1em; margin-left: 8px; }
+.date { font-size: 15px; letter-spacing: .06em; font-variant-numeric: tabular-nums; display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; }
+.wx { display: inline-flex; align-items: center; gap: 6px; padding: 1px 10px; border-radius: 99px; background: var(--surface); border: 1px solid var(--line); font-size: 13px; }
+.wx.alert { border-color: var(--warn); color: var(--warn); }
+.side-ctl { display: grid; gap: 10px; justify-items: end; }
+.wallet { display: inline-flex; align-items: center; gap: 8px; font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.wallet small { font-size: 13px; font-weight: 400; color: var(--ink-soft); }
+.coin { width: 20px; height: 20px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #ffe7a0, #e0a92a 60%, #b07d12); box-shadow: inset 0 0 0 2px #c8921b; }
+.ctl-row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; align-items: center; }
+.next { border: 0; border-radius: 99px; padding: 8px 18px; background: var(--ink); color: var(--bg); font-weight: 600; letter-spacing: .06em; }
+.next:hover { background: color-mix(in oklab, var(--ink) 85%, var(--accent)); }
+
+/* ---------- layout ---------- */
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 18px; align-items: start; }
+.sec-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+.sec-head h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 22px; letter-spacing: .08em; }
+.sec-head .meta { color: var(--ink-soft); font-size: 13px; }
+.sec-head .push { margin-left: auto; }
+.ghost { border: 1px solid var(--line); background: var(--surface); border-radius: 99px; padding: 4px 12px; font-size: 13px; }
+.ghost:hover:not(:disabled) { border-color: var(--accent); }
+.ghost:disabled { opacity: .45; cursor: not-allowed; }
+
+/* ---------- balcony ---------- */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; display: grid; grid-template-rows: auto 1fr; }
+.card.target { border-color: var(--accent); box-shadow: 0 0 0 2px color-mix(in oklab, var(--accent) 40%, transparent); }
+.cv-wrap { position: relative; background: linear-gradient(to bottom, color-mix(in oklab, var(--accent) 9%, var(--surface)), var(--surface) 72%); }
+.cv-wrap.in { background: linear-gradient(to bottom, var(--indoor), var(--surface) 80%); }
+.cv-wrap canvas { display: block; width: 100%; aspect-ratio: 200 / 220; max-width: 100%; touch-action: manipulation; cursor: pointer; }
+.chip { position: absolute; top: 10px; left: 10px; font-size: 12px; padding: 1px 9px; border-radius: 99px; background: var(--surface); border: 1px solid var(--line); letter-spacing: .06em; }
+.chip.ripe { background: var(--accent); color: var(--surface); border-color: transparent; }
+.chip.dead { background: var(--surface-2); color: var(--ink-soft); }
+.age { position: absolute; top: 11px; right: 12px; font-size: 12px; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.where { position: absolute; left: 10px; bottom: 8px; font-size: 11.5px; color: var(--ink-soft); letter-spacing: .08em; }
+.info { padding: 10px 12px 12px; display: grid; gap: 8px; align-content: start; }
+.name-row { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.name-row h3 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 20px; letter-spacing: .06em; }
+.name-row span { font-size: 12px; color: var(--ink-soft); margin-left: auto; }
+.bars { display: grid; gap: 4px; }
+.bar { display: grid; grid-template-columns: 2.6em minmax(0, 1fr) 2.9em; gap: 6px; align-items: center; font-size: 12px; color: var(--ink-soft); }
+.bar b { font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; color: var(--ink); }
+.track { position: relative; height: 7px; border-radius: 7px; background: var(--surface-2); overflow: hidden; }
+.track i { position: absolute; inset: 0 auto 0 0; border-radius: 7px; transition: width .4s; }
+.track .band { position: absolute; top: 0; bottom: 0; background: color-mix(in oklab, var(--ink) 10%, transparent); border-left: 1px dashed color-mix(in oklab, var(--ink) 40%, transparent); border-right: 1px dashed color-mix(in oklab, var(--ink) 40%, transparent); }
+.bar.water i { background: var(--water); } .bar.nutr i { background: var(--nutr); } .bar.soil i { background: var(--soil); }
+.bar.light i { background: var(--sun); } .bar.heart i { background: var(--heart); } .bar.grow i { background: var(--grow); }
+.bar.off b { color: var(--nutr); }
+.bar.off.g2 b, .bar.off.g3 b { color: var(--warn); }
+.status.sub { color: var(--ink-soft); font-size: 12.5px; margin-top: -4px; }
+.care-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 6px; border-radius: 12px; background: color-mix(in oklab, var(--heart) 10%, var(--surface)); }
+.item p.rng { font-size: 11.5px; font-variant-numeric: tabular-nums; }
+.owner { font-family: var(--font-body); font-size: 13px; color: var(--ink-soft); letter-spacing: .1em; margin-left: 8px; border: 0; border-bottom: 1px dashed var(--ink-soft); background: none; padding: 0 0 1px; }
+.owner:hover { color: var(--ink); }
+.owner::after { content: " ✎"; font-size: 11px; }
+.lv { display: flex; align-items: center; gap: 10px; font-size: 13px; flex-wrap: wrap; }
+.lv b { font-weight: 600; letter-spacing: .04em; }
+.xpbar { width: min(220px, 40vw); height: 8px; border-radius: 8px; background: color-mix(in oklab, var(--accent) 18%, var(--surface)); overflow: hidden; }
+.xpbar i { display: block; height: 100%; background: var(--accent); border-radius: 8px; transition: width .5s; }
+.lv span { color: var(--ink-soft); font-variant-numeric: tabular-nums; font-size: 12px; }
+.dexbtn { padding: 7px 14px; }
+.care-row.fert { background: color-mix(in oklab, var(--nutr) 12%, var(--surface)); }
+.tag.rec { background: var(--accent); color: var(--surface); border-color: transparent; }
+.tag.lock { border-style: dashed; }
+.item.locked { opacity: .62; }
+.item p.plan { color: var(--ink); }
+.overlay { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 16px; background: color-mix(in oklab, var(--ink) 40%, transparent); }
+.overlay[hidden] { display: none; }
+.modal { width: 100%; max-width: 420px; max-height: 86vh; overflow-y: auto; background: var(--surface); border-radius: 18px; padding: 20px; display: grid; gap: 12px; border: 1px solid var(--line); }
+.modal.big { max-width: 920px; }
+.modal h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 24px; letter-spacing: .08em; }
+.modal p { margin: 0; color: var(--ink-soft); }
+.namerow { display: flex; align-items: center; gap: 8px; font-size: 18px; }
+.namerow input { flex: 1; min-width: 0; font: inherit; font-size: 18px; padding: 8px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); }
+.namerow input:focus-visible { outline: 2px solid var(--accent); }
+.dexcat { font-family: var(--font-display); font-size: 18px; letter-spacing: .08em; margin: 14px 0 8px; }
+.dexgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; }
+.dextile { border: 1px solid var(--line); border-radius: 12px; padding: 6px 6px 8px; display: grid; justify-items: center; gap: 2px; text-align: center; }
+.dextile canvas { width: 100%; max-width: 96px; aspect-ratio: 200 / 220; display: block; }
+.dextile strong { font-family: var(--font-display); font-weight: 400; font-size: 15px; letter-spacing: .05em; }
+.dextile span { font-size: 11px; color: var(--ink-soft); }
+.dextile.no strong { color: var(--ink-soft); }
+.guide summary { font-family: var(--font-display); font-size: 20px; letter-spacing: .08em; cursor: pointer; }
+.guide p { margin: 8px 0 0; font-size: 13px; color: var(--ink-soft); max-width: 65ch; }
+.guide b { color: var(--ink); }
+.status { margin: 0; font-size: 13px; min-height: 1.55em; }
+.status.bad { color: var(--warn); }
+.acts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.act { display: inline-flex; flex-direction: column; align-items: center; gap: 1px; padding: 6px 2px 5px; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; font-size: 12px; line-height: 1.35; }
+.act svg { width: 18px; height: 18px; }
+.act:hover:not(:disabled) { border-color: var(--accent); background: color-mix(in oklab, var(--accent) 8%, var(--surface)); }
+.act:disabled { opacity: .42; cursor: default; }
+.act .cost { font-size: 11px; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.wide { border: 0; border-radius: 10px; padding: 8px; font-weight: 600; letter-spacing: .06em; background: var(--accent); color: var(--surface); }
+.wide.soft { background: var(--surface-2); color: var(--ink); font-weight: 400; }
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.empty { border-style: dashed; background: transparent; }
+.empty .slot-body { padding: 26px 16px; display: grid; gap: 10px; justify-items: center; text-align: center; color: var(--ink-soft); min-height: 220px; align-content: center; }
+.empty .slot-body strong { font-family: var(--font-display); font-weight: 400; font-size: 20px; color: var(--ink); letter-spacing: .08em; }
+
+/* ---------- shop ---------- */
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 14px; }
+.side { display: grid; gap: 18px; }
+.tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 10px; }
+.tabs button { border: 1px solid var(--line); background: none; border-radius: 99px; padding: 4px 12px; font-size: 13px; color: var(--ink-soft); }
+.tabs button[aria-selected="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.shop-hint { font-size: 12.5px; color: var(--ink-soft); margin: 0 0 10px; }
+.items { display: grid; gap: 8px; max-height: 680px; overflow-y: auto; padding-right: 2px; }
+.item { display: grid; grid-template-columns: 74px minmax(0, 1fr); gap: 10px; padding: 8px; border-radius: 12px; border: 1px solid var(--line); align-items: center; }
+.item canvas { width: 74px; height: 81px; display: block; border-radius: 8px; background: color-mix(in oklab, var(--accent) 6%, var(--surface)); }
+.item .tx { display: grid; gap: 2px; min-width: 0; }
+.item .t1 { display: flex; align-items: baseline; gap: 5px; flex-wrap: wrap; }
+.item .t1 strong { font-family: var(--font-display); font-weight: 400; font-size: 17px; letter-spacing: .05em; margin-right: 2px; }
+.tag { font-size: 11px; padding: 0 7px; border-radius: 99px; border: 1px solid var(--line); color: var(--ink-soft); }
+.tag.got { border-color: var(--grow); color: var(--grow); }
+.item p { margin: 0; font-size: 12px; color: var(--ink-soft); }
+.item .t3 { display: flex; align-items: center; gap: 8px; margin-top: 3px; flex-wrap: wrap; }
+.item .t3 span { font-size: 12px; font-variant-numeric: tabular-nums; }
+.buy { margin-left: auto; border: 0; border-radius: 99px; padding: 3px 14px; background: var(--accent); color: var(--surface); font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.buy:disabled { background: var(--surface-2); color: var(--ink-soft); cursor: not-allowed; }
+
+/* ---------- diary ---------- */
+.log { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; max-height: 260px; overflow-y: auto; font-size: 13px; }
+.log li { display: grid; grid-template-columns: 4.6em minmax(0, 1fr); gap: 8px; }
+.log li span { color: var(--ink-soft); font-variant-numeric: tabular-nums; font-size: 12px; padding-top: 1px; }
+.foot { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; color: var(--ink-soft); font-size: 12px; align-items: center; }
+
+.toast { position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 20px); opacity: 0; pointer-events: none;
+  max-width: min(520px, calc(100vw - 32px)); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 12px; font-size: 13.5px; transition: opacity .3s, transform .3s; z-index: 10; }
+.toast.on { opacity: 1; transform: translate(-50%, 0); }
+
+@media (max-width: 920px) {
+  .layout { grid-template-columns: minmax(0, 1fr); }
+  .items { max-height: none; }
+}
+@media (max-width: 560px) {
+  .top { grid-template-columns: auto minmax(0, 1fr); padding: 14px; }
+  .glyph { font-size: 48px; width: 52px; }
+  .side-ctl { grid-column: 1 / -1; justify-items: stretch; }
+  .wallet { justify-content: flex-start; }
+  .ctl-row { justify-content: space-between; }
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .info { padding: 8px 8px 10px; }
+  .name-row h3 { font-size: 17px; }
+  .name-row span { margin-left: 0; }
+  .bar { grid-template-columns: 2.4em minmax(0, 1fr) 2.6em; gap: 4px; }
+  .acts { gap: 4px; }
+  .act { font-size: 11px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header class="top">
+    <div class="glyph" id="glyph" aria-hidden="true">春</div>
+    <div class="when">
+      <h1>四季盆栽<button class="owner" id="owner" title="改名字">清清的阳台</button></h1>
+      <div class="date"><span id="date">第1年 · 春 · 第1天</span><span class="wx" id="wx">今天 晴 16°C</span><span class="wx" id="fc">明天 晴</span></div>
+      <div class="lv"><b id="lvname">Lv.1 新手园丁</b><div class="xpbar" role="progressbar" aria-label="经验"><i id="xpfill"></i></div><span id="xptxt">0 / 30</span></div>
+    </div>
+    <div class="side-ctl">
+      <div class="wallet"><span class="coin" aria-hidden="true"></span><span id="gold">500</span><small>金币</small></div>
+      <div class="ctl-row">
+        <button class="ghost dexbtn" id="dexbtn">图鉴</button>
+        <button class="next" id="next">睡一觉 · 下一天</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section>
+      <div class="sec-head">
+        <h2>阳台</h2><span class="meta" id="slotinfo"></span>
+        <button class="ghost push" id="expand">扩建阳台</button>
+      </div>
+      <div class="grid" id="grid"></div>
+    </section>
+
+    <aside class="side">
+      <section class="panel" id="shop">
+        <div class="sec-head"><h2>花市</h2><span class="meta" id="shopmeta"></span></div>
+        <div class="tabs" role="tablist">
+          <button role="tab" data-tab="pots" aria-selected="true">花盆</button>
+          <button role="tab" data-tab="flower" aria-selected="false">花卉</button>
+          <button role="tab" data-tab="grass" aria-selected="false">绿植·草</button>
+          <button role="tab" data-tab="succ" aria-selected="false">多肉</button>
+          <button role="tab" data-tab="tree" aria-selected="false">树木</button>
+        </div>
+        <p class="shop-hint" id="shophint"></p>
+        <div class="items" id="items"></div>
+      </section>
+      <details class="panel guide">
+        <summary>健康怎么算</summary>
+        <p>每株植物的水分、肥力、松软、光照都有自己的<b>合适区间</b>，就是进度条上虚线框住的那一段。比如水量适中的植物，水分要在 60–80 之间。</p>
+        <p>每晚睡觉时结算一次：四项都在区间里，健康 <b>+5</b>；哪一项偏出去一点 <b>−2</b>，偏得多 <b>−6</b>，到极端（干透、积水、烧根）<b>−12</b>。多了少了都扣。耐旱的植物怕水多，喜湿的怕干，耐阴的怕晒，这几种情况扣得更重。</p>
+        <p>霜冻会冻伤阳台上的植物：不耐寒的 −12，耐寒的 −4，屋里的不受影响。深秋（秋 5 日以后）开始可能下霜。</p>
+        <p>每株每天可以陪伴一次（摸一摸或听首歌），健康随机 +3~8。卡片上的“今晚”一行会提前告诉你结算结果。</p>
+        <p>施肥每天一次，二选一：复合肥 8 金，肥力 +35；自制堆肥免费，肥力随机 +0~20，偶尔一点不涨。</p>
+        <p>每养成一株植物都有经验，长得越慢、越贵的植物经验越多。升级会解锁新的植物。花市会按当前季节标出“本季推荐”，并算好现在种下多久长成、能不能赶上花期。</p>
+      </details>
+      <section class="panel">
+        <div class="sec-head"><h2>园艺日记</h2></div>
+        <ol class="log" id="log"></ol>
+      </section>
+      <div class="foot"><span>进度自动保存在这台设备上</span><button class="ghost" id="reset">重新开始</button></div>
+    </aside>
+  </main>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="overlay" id="namebox" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="nametitle">
+      <h2 id="nametitle">给阳台起个名字</h2>
+      <p>这会写在阳台的门牌上，以后点标题旁边的名字还能再改。</p>
+      <label class="namerow" for="ownerin"><input id="ownerin" maxlength="10" placeholder="清清" autocomplete="off"><span>的阳台</span></label>
+      <button class="wide" id="namego">就叫这个</button>
+    </div>
+  </div>
+  <div class="overlay" id="dexbox" hidden>
+    <div class="modal big" role="dialog" aria-modal="true" aria-labelledby="dextitle">
+      <div class="sec-head"><h2 id="dextitle">全图鉴</h2><span class="meta" id="dexmeta"></span><button class="ghost push" id="dexclose">关闭</button></div>
+      <div id="dexgrid"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+const TAU = Math.PI * 2;
+const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $ = id => document.getElementById(id);
+const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+
+/* ================= data ================= */
+const SEASONS = ['春', '夏', '秋', '冬'];
+const DAYS_PER_SEASON = 7;
+const NEED = {
+  xlow: { label: '极耐旱', mul: 0.4, range: [15, 40] },
+  low:  { label: '耐旱', mul: 0.7, range: [25, 55] },
+  mid:  { label: '水量适中', mul: 1.0, range: [60, 80] },
+  high: { label: '喜湿', mul: 1.25, range: [70, 90] },
+};
+const LIGHT = {
+  sun:   { label: '喜阳', range: [55, 100] },
+  half:  { label: '半阴', range: [35, 80] },
+  shade: { label: '耐阴', range: [15, 55] },
+};
+const FEED = {
+  light:  { label: '少肥', range: [15, 50], decay: 3 },
+  normal: { label: '中等', range: [35, 75], decay: 4 },
+  heavy:  { label: '喜肥', range: [50, 85], decay: 5 },
+};
+const SOIL_RANGE = [40, 85];
+// how far outside the ideal range still counts as "a little off" (−2); beyond that is "off" (−6); extremes are −12
+const MARGIN = { water: 15, nutr: 15, soil: 15, light: 25 };
+const PENALTY = [0, 2, 6, 12];
+const WX_LIGHT = { '晴': 85, '多云': 55, '小雨': 30, '雷阵雨': 20, '高温': 100, '雪': 35, '霜冻': 75 };
+const SEASON_LIGHT = [0, 5, 0, -10];
+const SEASON_DRY = [1, 1.3, 1.1, 0.6];
+const WATER_DECAY = 12, WATER_ADD = 20, DRAIN = 30, FERT_ADD = 35, FREE_FERT_MAX = 20, SOIL_ADD = 35, FERT_COST = 8;
+const HEAVY_FEEDERS = ['rose', 'sunflower', 'hydrangea', 'peach', 'lemon'];
+const LIGHT_FEEDERS = ['lavender', 'foxtail', 'snake', 'podocarpus'];
+
+const POTS = {
+  clay:    { name: '陶土盆', price: 60,  dry: 1,    compact: 1,   grow: 1,    sell: 1,    desc: '透气好，最朴素也最可靠。' },
+  wood:    { name: '木栅盆', price: 120, dry: 1.05, compact: 0.5, grow: 1,    sell: 1,    desc: '木板缝里透气，土不容易板结。' },
+  celadon: { name: '青瓷盆', price: 150, dry: 0.72, compact: 1,   grow: 1,    sell: 1.05, desc: '釉面锁水，浇一次能撑更久。' },
+  zisha:   { name: '紫砂盆', price: 260, dry: 0.9,  compact: 0.8, grow: 1.15, sell: 1.15, desc: '长得快一点，卖相也好，售价 +15%。' },
+};
+const potRefund = slot => slot.used ? Math.round(POTS[slot.type].price * 0.6) : POTS[slot.type].price;
+
+// colors are [h, s, l]
+const PLANTS = [
+  // ---- 花卉 ----
+  { id: 'rose', name: '月季', cat: 'flower', form: 'bush', fl: 'rose', color: [350, 65, 55], leaf: [120, 40, 32], price: 80, sell: 220, days: 14, need: 'mid', light: 'sun', grow: [0, 2], bloom: [0, 1, 2], hardy: true, note: '花中皇后，春秋两季开得最盛，要晒足太阳。' },
+  { id: 'tulip', name: '郁金香', cat: 'flower', form: 'single', fl: 'tulip', color: [8, 78, 56], leaf: [140, 25, 42], price: 60, sell: 170, days: 12, need: 'mid', light: 'sun', grow: [0, 3], bloom: [0], hardy: true, note: '球根花卉，熬过冬天的低温，春天才肯开花。' },
+  { id: 'sunflower', name: '向日葵', cat: 'flower', form: 'tall', fl: 'sun', color: [44, 92, 55], leaf: [95, 45, 36], price: 40, sell: 130, days: 10, need: 'high', light: 'sun', grow: [1], bloom: [1, 2], hardy: false, note: '花盘追着太阳转，长得飞快，夏天特别能喝水。' },
+  { id: 'jasmine', name: '茉莉花', cat: 'flower', form: 'bush', fl: 'star', color: [60, 40, 97], leaf: [115, 45, 30], price: 70, sell: 200, days: 14, need: 'high', light: 'sun', grow: [1], bloom: [1], hardy: false, note: '夏夜里最香。怕冷，冬天记得搬进屋。' },
+  { id: 'gardenia', name: '栀子花', cat: 'flower', form: 'bush', fl: 'gardenia', color: [50, 60, 95], leaf: [125, 45, 26], price: 90, sell: 240, days: 16, need: 'mid', light: 'half', grow: [0, 1], bloom: [1], hardy: false, note: '初夏开大朵白花，喜欢散射光和湿润空气。' },
+  { id: 'hydrangea', name: '绣球花', cat: 'flower', form: 'ball', fl: 'ball', color: [222, 60, 68], leaf: [110, 40, 35], price: 110, sell: 300, days: 18, need: 'high', light: 'half', grow: [0, 1], bloom: [1], hardy: true, note: '花色随土壤酸碱变化，是个喝水大胃王，怕暴晒。' },
+  { id: 'lavender', name: '薰衣草', cat: 'flower', form: 'spike', fl: 'lav', color: [265, 45, 62], leaf: [100, 14, 52], price: 75, sell: 210, days: 15, need: 'low', light: 'sun', grow: [0, 1], bloom: [1], hardy: true, note: '怕涝不怕旱，浇水宁少勿多。' },
+  { id: 'hyacinth', name: '风信子', cat: 'flower', form: 'single', fl: 'hya', color: [310, 50, 58], leaf: [125, 35, 38], price: 55, sell: 150, days: 11, need: 'mid', light: 'half', grow: [0, 3], bloom: [0], hardy: true, note: '早春的球根花，一串小铃铛，香气很浓。' },
+  // ---- 绿植·草 ----
+  { id: 'catgrass', name: '猫草', cat: 'grass', form: 'blades', leaf: [95, 60, 44], price: 20, sell: 60, days: 6, need: 'high', light: 'half', grow: [0, 1, 2], hardy: true, note: '其实是小麦的嫩苗，几天就窜一截，猫咪最爱。' },
+  { id: 'mint', name: '薄荷', cat: 'grass', form: 'pairs', leaf: [118, 48, 40], color: [275, 40, 78], price: 25, sell: 75, days: 8, need: 'high', light: 'half', grow: [0, 1], bloom: [1], hardy: true, note: '揉一片叶子满手清凉，喜湿，长势很旺。' },
+  { id: 'spider', name: '吊兰', cat: 'grass', form: 'arching', leaf: [105, 45, 40], price: 35, sell: 100, days: 10, need: 'mid', light: 'shade', grow: [0, 1, 2], hardy: false, note: '会抽出长长的匍匐茎，挂满小吊兰宝宝。放屋里就好。' },
+  { id: 'foxtail', name: '狗尾巴草', cat: 'grass', form: 'foxtail', leaf: [90, 40, 40], price: 15, sell: 50, days: 7, need: 'low', light: 'sun', grow: [1, 2], hardy: true, note: '路边最常见的野草，秋天毛茸茸的穗子会变黄。' },
+  { id: 'pennywort', name: '铜钱草', cat: 'grass', form: 'coins', leaf: [100, 55, 42], price: 25, sell: 80, days: 8, need: 'high', light: 'half', grow: [0, 1], hardy: false, note: '圆圆的叶子像一枚枚铜钱，特别喜欢水。' },
+  { id: 'snake', name: '虎尾兰', cat: 'grass', form: 'sword', leaf: [135, 40, 26], price: 50, sell: 140, days: 13, need: 'low', light: 'shade', grow: [1], hardy: false, note: '叶片上有虎尾一样的横纹，耐阴耐旱的懒人草。' },
+  { id: 'mimosa', name: '含羞草', cat: 'grass', form: 'feather', leaf: [100, 40, 40], color: [330, 80, 74], price: 30, sell: 90, days: 9, need: 'mid', light: 'sun', grow: [1], bloom: [1], hardy: false, note: '摸一下，叶子就害羞地合起来。' },
+  { id: 'fern', name: '文竹', cat: 'grass', form: 'cloud', leaf: [100, 45, 45], price: 40, sell: 120, days: 12, need: 'mid', light: 'shade', grow: [0, 1, 2], hardy: false, note: '不是竹子，枝叶一层层像云片，书桌上的常客。' },
+  // ---- 多肉 ----
+  { id: 'cactusball', name: '仙人球', cat: 'succ', form: 'barrel', leaf: [125, 35, 34], color: [330, 70, 82], fl: 'cactus', price: 30, sell: 95, days: 12, need: 'xlow', light: 'sun', grow: [1], bloom: [1], hardy: false, note: '浑身是刺的小圆球，几乎不用管，夏天顶上会开一朵大花。' },
+  { id: 'opuntia', name: '仙人掌', cat: 'succ', form: 'paddle', leaf: [95, 38, 42], color: [50, 90, 60], fl: 'cactus', price: 35, sell: 105, days: 13, need: 'xlow', light: 'sun', grow: [1], bloom: [1], hardy: false, note: '一片片扁扁的“手掌”往上摞，耐旱冠军。' },
+  { id: 'aloe', name: '芦荟', cat: 'succ', form: 'aloe', leaf: [140, 20, 50], price: 45, sell: 130, days: 12, need: 'low', light: 'sun', grow: [1], hardy: false, note: '肉质叶片自己存水，非常耐旱，最怕浇太多。' },
+  { id: 'haworthia', name: '玉露', cat: 'succ', form: 'window', leaf: [140, 35, 40], price: 55, sell: 160, days: 15, need: 'low', light: 'half', grow: [0, 2], hardy: false, note: '叶尖有透明的“小窗”，太阳太烈会晒伤，喜欢柔和的光。' },
+  { id: 'bearpaw', name: '熊童子', cat: 'succ', form: 'bearpaw', leaf: [95, 30, 60], price: 60, sell: 170, days: 15, need: 'xlow', light: 'sun', grow: [0, 2], hardy: false, note: '毛茸茸的胖叶子顶端有红色“小爪子”，像小熊的手掌。' },
+  { id: 'lithops', name: '生石花', cat: 'succ', form: 'stone', leaf: [60, 14, 62], top: [30, 28, 46], color: [48, 90, 62], price: 70, sell: 200, days: 18, need: 'xlow', light: 'sun', grow: [2], bloom: [2], hardy: false, note: '长得像一对小石头，秋天从缝里开出一朵小花。最怕水多。' },
+  { id: 'echeveria', name: '石莲花', cat: 'succ', form: 'rosette', leaf: [170, 22, 62], tip: [345, 55, 70], color: [20, 85, 60], price: 45, sell: 135, days: 13, need: 'low', light: 'sun', grow: [0, 2], bloom: [0], hardy: false, note: '叶片一圈圈排成莲座，晒足太阳叶尖会泛粉。' },
+  { id: 'jade', name: '玉树', cat: 'succ', form: 'jade', leaf: [120, 38, 34], color: [345, 40, 92], price: 65, sell: 190, days: 18, need: 'low', light: 'sun', grow: [0, 1, 2], bloom: [3], hardy: false, note: '又叫燕子掌，肉嘟嘟的叶子带红边，冬天会开小白花。' },
+  // ---- 树木 ----
+  { id: 'sakura', name: '樱花', cat: 'tree', form: 'tree', shape: 'umbrella', lf: 'oval', bark: [8, 22, 32], leaves: [[100, 45, 55], [110, 40, 36], [18, 65, 50], null], blossom: { color: [345, 75, 88], seasons: [0], cover: true }, price: 240, sell: 700, days: 32, need: 'mid', light: 'sun', grow: [0, 1], hardy: true, show: 0, note: '春天满树粉白，花期很短，风一吹落英缤纷。' },
+  { id: 'peach', name: '桃树', cat: 'tree', form: 'tree', shape: 'vase', lf: 'narrow', bark: [12, 28, 28], leaves: [[95, 45, 50], [105, 42, 35], [45, 70, 52], null], blossom: { color: [340, 75, 74], seasons: [0] }, fruit: { color: [15, 85, 72], seasons: [1], kind: 'peach' }, price: 200, sell: 600, days: 30, need: 'mid', light: 'sun', grow: [0, 1], hardy: true, show: 0, note: '春天桃花灼灼，夏天结出毛茸茸的桃子。' },
+  { id: 'osmanthus', name: '桂花', cat: 'tree', form: 'tree', shape: 'round', lf: 'narrow', bark: [25, 15, 36], leaves: [[115, 35, 32], [118, 38, 28], [115, 35, 28], [120, 30, 26]], blossom: { color: [40, 90, 58], seasons: [2], tiny: true }, price: 260, sell: 760, days: 34, need: 'mid', light: 'sun', grow: [0, 1, 2], hardy: true, show: 2, note: '八月桂花香，秋天开出米粒大小的金色小花。' },
+  { id: 'ginkgo', name: '银杏', cat: 'tree', form: 'tree', shape: 'cone', lf: 'fan', bark: [30, 10, 40], leaves: [[85, 50, 55], [95, 45, 40], [48, 92, 56], null], price: 300, sell: 900, days: 40, need: 'mid', light: 'sun', grow: [0, 1], hardy: true, show: 2, note: '植物界的活化石，扇形叶子秋天变成一树金黄。' },
+  { id: 'maple', name: '红枫', cat: 'tree', form: 'tree', shape: 'umbrella', lf: 'star', bark: [15, 18, 30], leaves: [[8, 58, 46], [28, 38, 38], [2, 72, 46], null], price: 280, sell: 820, days: 36, need: 'mid', light: 'half', grow: [0, 1], hardy: true, show: 2, note: '春天新叶就带红，秋天红得最透。夏天怕暴晒。' },
+  { id: 'podocarpus', name: '罗汉松', cat: 'tree', form: 'pine', bark: [22, 25, 30], leaves: [[120, 32, 34], [125, 32, 28], [125, 30, 27], [130, 25, 26]], price: 320, sell: 950, days: 42, need: 'low', light: 'half', grow: [0, 1, 2], hardy: true, show: 1, note: '常做盆景的树，叶子细长，四季常青，长得慢。' },
+  { id: 'lemon', name: '柠檬树', cat: 'tree', form: 'tree', shape: 'round', lf: 'oval', bark: [30, 18, 34], leaves: [[110, 45, 34], [112, 48, 30], [112, 45, 30], [115, 40, 28]], blossom: { color: [50, 80, 97], seasons: [0] }, fruit: { color: [52, 88, 58], seasons: [2, 3], kind: 'lemon' }, price: 220, sell: 660, days: 30, need: 'mid', light: 'sun', grow: [0, 1], hardy: false, show: 2, note: '春天开香香的白花，秋冬挂满黄澄澄的柠檬。怕冻。' },
+  { id: 'pomegranate', name: '石榴', cat: 'tree', form: 'tree', shape: 'round', lf: 'narrow', bark: [20, 22, 30], leaves: [[90, 45, 45], [105, 45, 33], [45, 75, 50], null], blossom: { color: [8, 80, 52], seasons: [1] }, fruit: { color: [355, 65, 45], seasons: [2], kind: 'pom' }, price: 230, sell: 680, days: 32, need: 'low', light: 'sun', grow: [1, 2], hardy: true, show: 2, note: '夏天开火红的花，秋天结出咧嘴笑的石榴。' },
+];
+PLANTS.forEach(p => { p.feed = HEAVY_FEEDERS.includes(p.id) ? 'heavy' : (p.cat === 'succ' || LIGHT_FEEDERS.includes(p.id)) ? 'light' : 'normal'; });
+const UNLOCK = {
+  catgrass: 1, foxtail: 1, mint: 1, sunflower: 1, cactusball: 1, pennywort: 1, hyacinth: 1,
+  tulip: 2, mimosa: 2, spider: 2, opuntia: 2, aloe: 2, echeveria: 2, rose: 2,
+  jasmine: 3, lavender: 3, fern: 3, snake: 3, haworthia: 3, bearpaw: 3,
+  gardenia: 4, lithops: 4, jade: 4, hydrangea: 4, peach: 4,
+  lemon: 5, pomegranate: 5, sakura: 5, osmanthus: 6, maple: 6, ginkgo: 7, podocarpus: 7,
+};
+// experience for growing one to maturity: slower and pricier plants are worth more
+PLANTS.forEach(p => { p.lv = UNLOCK[p.id] || 1; p.xp = Math.round(p.days * 2 + p.price / 8); });
+const TITLES = ['新手园丁', '见习园丁', '园丁', '资深园丁', '花匠', '园艺师', '园艺大师', '花园主人'];
+const title = L => TITLES[Math.min(L, TITLES.length) - 1];
+function levelOf(total) { let L = 1, need = 30, cur = total; while (cur >= need) { cur -= need; L++; need = 30 + (L - 1) * 25; } return { L, cur, need }; }
+const myLevel = () => levelOf(state.xp).L;
+const SP = Object.fromEntries(PLANTS.map(p => [p.id, p]));
+const idealOf = sp => ({ water: NEED[sp.need].range, nutr: FEED[sp.feed].range, soil: SOIL_RANGE, light: LIGHT[sp.light].range });
+const mid = r => Math.round((r[0] + r[1]) / 2);
+
+const WX_TABLE = [
+  [['晴', 45], ['多云', 25], ['小雨', 30]],
+  [['晴', 35], ['高温', 25], ['雷阵雨', 25], ['多云', 15]],
+  [['晴', 50], ['多云', 30], ['小雨', 20]],
+  [['晴', 35], ['多云', 30], ['雪', 22], ['霜冻', 13]],
+];
+const LATE_AUTUMN = [['晴', 45], ['多云', 25], ['小雨', 15], ['霜冻', 15]]; // 霜降 after the 5th day of autumn
+const TEMP = [[10, 22], [25, 33], [13, 24], [-3, 8]];
+const SEASON_TIPS = [
+  '立春了。万物抽芽，正是长个子的时候。',
+  '入夏了。水分蒸发得快，太阳也烈，怕晒的可以搬进屋。',
+  '立秋了。落叶树要开始换颜色了。',
+  '入冬了。大多数植物长得慢，少浇点水。怕冷的记得搬进屋。',
+];
+const PET_LINES = ['叶子轻轻晃了晃，像在蹭你的手。', '它好像精神了一点。', '摸起来凉凉的，很舒服。', '你和它说了几句悄悄话。', '它在阳光里伸了个懒腰。', '感觉它今天心情不错。'];
+
+/* ================= state ================= */
+const SAVE_KEY = 'siji-penzai-v2';
+let state;
+function freshState() {
+  return {
+    day: 0, gold: 500, slots: 4, pots: [null, null, null, null],
+    weather: '晴', temp: 16, forecast: '多云', ftemp: 15, seq: 1, dex: {}, xp: 0, owner: '清清', named: false,
+    log: [{ d: 0, t: '欢迎来到你的小阳台。先去花市挑一个花盆，再挑一株幼苗吧。' }],
+    tab: 'pots', target: -1,
+  };
+}
+function migrate(s) {
+  if (!s || typeof s.day !== 'number') return null;
+  s.forecast = s.forecast || '晴'; s.ftemp = s.ftemp ?? 16;
+  s.pots = s.pots.map(p => p && { type: p.type, indoor: !!p.indoor, used: p.used ?? !!p.plant, plant: p.plant && SP[p.plant.sp] ? { ...p.plant } : null });
+  delete s.speed; delete s.clock;
+  s.owner = s.owner || '清清'; s.named = !!s.named;
+  if (typeof s.xp !== 'number') s.xp = Object.keys(s.dex || {}).reduce((a, id) => a + (SP[id] ? SP[id].xp * (+s.dex[id] || 1) : 0), 0);
+  return s;
+}
+function save() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(state)); } catch (e) {} }
+function load() {
+  try {
+    const s = JSON.parse(localStorage.getItem(SAVE_KEY));
+    if (s) return migrate(s);
+    const old = JSON.parse(localStorage.getItem('siji-penzai-v1'));
+    if (old) return migrate(old);
+  } catch (e) {}
+  return null;
+}
+
+const seasonOf = d => Math.floor(d / DAYS_PER_SEASON) % 4;
+const yearOf = d => Math.floor(d / (DAYS_PER_SEASON * 4)) + 1;
+const dayLabel = d => `${SEASONS[seasonOf(d)]}${d % DAYS_PER_SEASON + 1}日`;
+
+function lightAt(indoor, weather, season) {
+  const out = clamp(WX_LIGHT[weather] + SEASON_LIGHT[season], 0, 100);
+  return indoor ? Math.round(20 + out * 0.18) : out;
+}
+const dormant = (sp, season) => sp.cat === 'tree' && sp.leaves && !sp.leaves[season];
+const slotLight = slot => lightAt(slot.indoor, state.weather, seasonOf(state.day));
+
+function isBlooming(pl, sp, season) {
+  if (pl.dead || !pl.matured) return false;
+  if (sp.cat === 'tree') return !!(sp.blossom && sp.blossom.seasons.includes(season));
+  return !!(sp.bloom && sp.bloom.includes(season));
+}
+function isFruiting(pl, sp, season) {
+  return !pl.dead && pl.matured && !!(sp.fruit && sp.fruit.seasons.includes(season));
+}
+function sellPrice(slot) {
+  const pl = slot.plant, sp = SP[pl.sp], s = seasonOf(state.day);
+  let p = sp.sell * (0.6 + 0.4 * pl.health / 100) * POTS[slot.type].sell;
+  if (isBlooming(pl, sp, s)) p *= 1.25;
+  if (isFruiting(pl, sp, s)) p *= 1.2;
+  return Math.round(p);
+}
+function stageName(pl, sp) {
+  if (pl.dead) return '枯萎';
+  const s = seasonOf(state.day);
+  if (pl.matured) {
+    if (isFruiting(pl, sp, s)) return '结果了';
+    if (isBlooming(pl, sp, s)) return sp.cat === 'tree' ? '满树花开' : '开花了';
+    return sp.cat === 'tree' ? '成树' : '成株';
+  }
+  if (pl.progress < 30) return '幼苗';
+  if (pl.progress < 70) return '生长期';
+  return sp.cat === 'tree' ? '小树' : (sp.bloom ? '花苞期' : '快长大了');
+}
+// grade one value against its ideal range: 0 ideal, 1 a little off, 2 off, 3 extreme
+function grade(val, [lo, hi], m, exLo, exHi) {
+  if (val >= lo && val <= hi) return [0, 0];
+  const low = val < lo, d = low ? lo - val : val - hi;
+  let g = d <= m ? 1 : 2;
+  if ((low && val <= exLo) || (!low && val >= exHi)) g = 3;
+  return [g, low ? -1 : 1];
+}
+const DIMS = [
+  { k: 'water', name: '水分', exLo: 5, exHi: 100.5, low: ['有点干', '缺水', '干透了'], high: ['偏湿', '太湿', '积水烂根'] },
+  { k: 'nutr', name: '肥力', exLo: 5, exHi: 100.5, low: ['肥力偏低', '缺肥发黄', '严重缺肥'], high: ['肥偏多', '肥太多', '烧根'] },
+  { k: 'soil', name: '松软', exLo: 8, exHi: 999, low: ['土有点紧', '土壤板结', '板结闷根'], high: ['松得太勤', '伤到细根', '伤根'] },
+  { k: 'light', name: '光照', exLo: -1, exHi: 999, low: ['光线偏暗', '光照不足', '几乎不见光'], high: ['光线偏强', '太晒了', '晒伤'] },
+];
+function evaluate(slot, season = seasonOf(state.day), weather = state.weather) {
+  const pl = slot.plant, sp = SP[pl.sp], I = idealOf(sp);
+  const vals = { water: pl.water, nutr: pl.nutr, soil: pl.soil, light: lightAt(slot.indoor, weather, season) };
+  const issues = [], grades = {};
+  let dh = 0, q = 0;
+  for (const D of DIMS) {
+    if (D.k === 'light' && dormant(sp, season)) { grades.light = 0; q += 1; continue; }
+    const [g, dir] = grade(vals[D.k], I[D.k], MARGIN[D.k], D.exLo, D.exHi);
+    grades[D.k] = g; q += [1, 0.7, 0.35, 0][g];
+    if (!g) continue;
+    let pen = PENALTY[g];
+    if (D.k === 'water' && dir > 0 && (sp.need === 'xlow' || sp.need === 'low')) pen *= 1.5;
+    if (D.k === 'water' && dir < 0 && sp.need === 'high') pen *= 1.5;
+    if (D.k === 'light' && dir > 0 && sp.light === 'shade') pen *= 1.5;
+    pen = Math.round(pen);
+    dh -= pen;
+    issues.push({ k: D.k, g, dir, pen, text: (dir < 0 ? D.low : D.high)[g - 1] });
+  }
+  if (!issues.length) dh = 5;
+  return { dh, issues, grades, q: q / 4, vals };
+}
+// what tomorrow's forecast will do to a plant left where it is
+function forecastWarn(slot) {
+  if (slot.indoor || !slot.plant || slot.plant.dead) return '';
+  const pl = slot.plant, sp = SP[pl.sp], f = state.forecast;
+  if (f === '霜冻') return sp.hardy ? (dormant(sp, seasonOf(state.day + 1)) ? '' : '明天打霜，它会冻伤一点（健康 −4）。') : '明天打霜，它不耐寒，搬进屋吧（否则健康 −12）。';
+  if (f === '小雨' || f === '雷阵雨') {
+    const after = pl.water - WATER_DECAY * NEED[sp.need].mul + (f === '小雨' ? 22 : 32);
+    if (after > NEED[sp.need].range[1] + 5) return `明天有${f}，土会太湿，可以先搬进屋。`;
+  }
+  if (f === '高温' && sp.light !== 'sun') return '明天高温暴晒，它怕晒，可以先搬进屋。';
+  return '';
+}
+function statusOf(slot) {
+  const pl = slot.plant, sp = SP[pl.sp];
+  if (pl.dead) return { main: '枯萎了……把它铲掉，花盆还能再用。', bad: true, extra: '' };
+  const ev = evaluate(slot);
+  let main;
+  if (ev.issues.length) {
+    const worst = ev.issues.slice().sort((a, b) => b.pen - a.pen).map(x => x.text).join('、');
+    main = `今晚 健康 ${ev.dh}：${worst}`;
+  } else main = pl.health >= 100 ? '今晚 各项刚好，健康满格' : `今晚 健康 +5：各项刚好`;
+  let extra = forecastWarn(slot);
+  if (!extra && pl.matured) extra = isBlooming(pl, sp, seasonOf(state.day)) ? '正是最好看的时候，卖价更高。' : '已经长大了，可以拿去卖。';
+  return { main, bad: ev.dh <= -6, extra, ev };
+}
+
+/* ================= actions ================= */
+function addLog(t) { state.log.unshift({ d: state.day, t }); state.log.length = Math.min(state.log.length, 40); }
+let toastTimer;
+function toast(t) { const el = $('toast'); el.textContent = t; el.classList.add('on'); clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('on'), 3400); }
+const fx = [];
+function addFx(i, type) { fx.push({ i, type, t0: performance.now() }); }
+const wiggles = {};
+
+function buyPot(type) {
+  const p = POTS[type];
+  const idx = state.pots.findIndex(x => x === null);
+  if (idx < 0) return toast('阳台放满了，先扩建一下吧。');
+  if (state.gold < p.price) return toast('金币不够。');
+  state.gold -= p.price;
+  state.pots[idx] = { type, indoor: false, used: false, plant: null };
+  state.target = idx;
+  addLog(`买了一个${p.name}，摆在阳台第 ${idx + 1} 格。`);
+  addFx(idx, 'spark');
+  if (state.tab === 'pots') state.tab = 'flower';
+  commit();
+  toast(`${p.name}到手！现在去挑一株植物吧。`);
+}
+function sellPot(i) {
+  const slot = state.pots[i]; if (!slot || slot.plant) return;
+  const r = potRefund(slot);
+  state.gold += r; state.pots[i] = null;
+  if (state.target === i) state.target = -1;
+  addLog(`${slot.used ? '把用过的' : '把没用过的'}${POTS[slot.type].name}卖了，拿回 ${r} 金币。`);
+  commit();
+  toast(`${POTS[slot.type].name}卖了 ${r} 金币。`);
+}
+function emptyPotIndex() {
+  const t = state.target;
+  if (t >= 0 && state.pots[t] && !state.pots[t].plant) return t;
+  return state.pots.findIndex(x => x && !x.plant);
+}
+function buyPlant(id) {
+  const sp = SP[id];
+  if (sp.lv > myLevel()) return toast(`${sp.name}要到 Lv.${sp.lv} 才能种。`);
+  const idx = emptyPotIndex();
+  if (idx < 0) return toast('没有空花盆了，先买一个花盆。');
+  if (state.gold < sp.price) return toast('金币不够。');
+  state.gold -= sp.price;
+  const slot = state.pots[idx];
+  slot.plant = { sp: id, id: state.seq++, progress: 0, health: 100, water: mid(NEED[sp.need].range), nutr: mid(FEED[sp.feed].range), soil: 65, done: {}, age: 0, matured: false, dead: false };
+  slot.used = true;
+  state.target = -1;
+  let extra = '';
+  if (sp.light === 'shade' && !slot.indoor) { slot.indoor = true; extra = '它耐阴怕晒，先放在屋里了。'; }
+  addLog(`把一株${sp.name}幼苗种进了${POTS[slot.type].name}。${extra}`);
+  addFx(idx, 'spark');
+  commit();
+  toast(extra ? `${sp.name}种好了。${extra}` : `${sp.name}种好了。浇水前先看看水分条。`);
+}
+function act(i, kind) {
+  const slot = state.pots[i]; if (!slot || !slot.plant) return;
+  const pl = slot.plant, sp = SP[pl.sp], slotKind = kind === 'freefert' ? 'fert' : kind;
+  menu = null;
+  if (pl.dead || pl.done[slotKind]) return render();
+  if (kind === 'water') {
+    pl.water = Math.min(130, pl.water + WATER_ADD);
+    if (pl.water > 100) toast(`${sp.name}的盆土已经很湿了，水漫出来了……`);
+  } else if (kind === 'fert') {
+    if (state.gold < FERT_COST) return toast('买肥料的钱都不够了。');
+    state.gold -= FERT_COST;
+    pl.nutr = Math.min(130, pl.nutr + FERT_ADD);
+    toast(pl.nutr > 100 ? '肥料下得太猛了。' : `施了一包复合肥，肥力 +${FERT_ADD}。`);
+  } else if (kind === 'freefert') {
+    const add = Math.random() < 0.2 ? 0 : 1 + Math.floor(Math.random() * FREE_FERT_MAX);
+    pl.nutr = Math.min(130, pl.nutr + add);
+    toast(add ? `撒了一把自制堆肥，肥力 +${add}。` : '这把堆肥还没腐熟，肥力一点没涨。');
+  } else if (kind === 'soil') {
+    pl.soil = Math.min(100, pl.soil + SOIL_ADD);
+    if (pl.soil > SOIL_RANGE[1]) toast('土本来就挺松的，再松会碰伤细根。');
+  } else if (kind === 'drain') {
+    if (pl.water <= 30) return;
+    pl.water = Math.max(0, pl.water - DRAIN);
+    toast(`把${sp.name}的盆斜过来，倒掉了多余的水。`);
+  } else if (kind === 'move') {
+    slot.indoor = !slot.indoor;
+    toast(slot.indoor ? `${sp.name}搬进屋了。不淋雨不挨冻，但光线弱一些。` : `${sp.name}搬回阳台，晒得到太阳了。`);
+  }
+  pl.done[slotKind] = true;
+  addFx(i, slotKind);
+  commit();
+}
+let menu = null; // { i, kind: 'care' | 'fert' } — the open choice row on a card
+function tap(i) {
+  const slot = state.pots[i]; if (!slot || !slot.plant) return;
+  if (slot.plant.sp === 'mimosa') slot.plant.touched = performance.now();
+  wiggles[i] = performance.now();
+}
+function care(i, kind) {
+  const slot = state.pots[i]; if (!slot || !slot.plant) return;
+  const pl = slot.plant, sp = SP[pl.sp];
+  menu = null;
+  if (pl.dead || pl.done.care) return render();
+  const gain = 3 + Math.floor(Math.random() * 6), before = pl.health;
+  pl.health = Math.min(100, pl.health + gain);
+  pl.done.care = true;
+  wiggles[i] = performance.now();
+  let line;
+  if (kind === 'music') {
+    playTune(); addFx(i, 'notes');
+    line = pick(['叶子跟着节奏轻轻晃。', '它好像很喜欢这首歌。', '安安静静地听完了一整首。']);
+  } else {
+    addFx(i, 'heart');
+    if (sp.id === 'mimosa') pl.touched = performance.now();
+    line = sp.id === 'mimosa' ? '叶子害羞地合上了，过一会儿又慢慢张开。'
+      : (sp.id === 'cactusball' || sp.id === 'opuntia') ? '小心扎手！不过它好像挺开心。'
+      : sp.id === 'bearpaw' ? '毛茸茸的，像在握小熊的手。'
+      : pick(PET_LINES);
+  }
+  toast(before >= 100 ? `${line}（它已经很健康了）` : `${line} 健康 +${pl.health - before}`);
+  commit();
+}
+let audioCtx = null;
+function playTune() {
+  try {
+    const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+    audioCtx = audioCtx || new AC();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const scale = [0, 2, 4, 7, 9, 12, 14, 16], base = 392;
+    let idx = 2 + Math.floor(Math.random() * 3), t = audioCtx.currentTime + 0.05;
+    for (let k = 0; k < 16; k++) {
+      idx = clamp(idx + pick([-2, -1, -1, 1, 1, 2, 0]), 0, scale.length - 1);
+      if (k === 15) idx = 0;
+      const dur = k % 4 === 3 ? 0.5 : 0.26;
+      const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+      o.type = 'triangle'; o.frequency.value = base * Math.pow(2, scale[idx] / 12);
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.16, t + 0.02); g.gain.exponentialRampToValueAtTime(0.001, t + dur + 0.25);
+      o.connect(g); g.connect(audioCtx.destination); o.start(t); o.stop(t + dur + 0.3);
+      t += dur;
+    }
+  } catch (e) {}
+}
+function sell(i) {
+  const slot = state.pots[i]; if (!slot || !slot.plant || !slot.plant.matured || slot.plant.dead) return;
+  const price = sellPrice(slot), sp = SP[slot.plant.sp];
+  state.gold += price;
+  addLog(`卖掉了养了 ${slot.plant.age} 天的${sp.name}，换来 ${price} 金币。`);
+  slot.plant = null;
+  addFx(i, 'coins');
+  commit();
+  toast(`${sp.name}卖了 ${price} 金币！花盆空出来了。`);
+}
+function clearPlant(i) {
+  const slot = state.pots[i]; if (!slot || !slot.plant) return;
+  addLog(`把枯掉的${SP[slot.plant.sp].name}铲掉了。`);
+  slot.plant = null; commit();
+}
+function expandCost() { return 150 + (state.slots - 4) * 100; }
+function expand() {
+  if (state.slots >= 10) return;
+  const c = expandCost();
+  if (state.gold < c) return toast(`扩建需要 ${c} 金币。`);
+  state.gold -= c; state.slots += 2; state.pots.push(null, null);
+  addLog(`花 ${c} 金币扩建了阳台，现在能放 ${state.slots} 盆。`);
+  commit();
+}
+function rollWeather(day) {
+  const season = seasonOf(day);
+  const tbl = season === 2 && day % DAYS_PER_SEASON >= 4 ? LATE_AUTUMN : WX_TABLE[season];
+  let r = Math.random() * tbl.reduce((a, b) => a + b[1], 0);
+  for (const [w, p] of tbl) { if ((r -= p) <= 0) return w; }
+  return tbl[0][0];
+}
+function rollTemp(season, w) {
+  if (w === '高温') return 35 + Math.floor(Math.random() * 4);
+  if (w === '霜冻') return season === 2 ? -1 + Math.floor(Math.random() * 3) : -6 + Math.floor(Math.random() * 5);
+  const [a, b] = TEMP[season];
+  return a + Math.floor(Math.random() * (b - a + 1)) - (w === '雪' ? 4 : 0);
+}
+
+function nextDay() {
+  const season = seasonOf(state.day);
+  const notes = [];
+  state.pots.forEach((slot) => {
+    if (!slot || !slot.plant || slot.plant.dead) return;
+    const pl = slot.plant, sp = SP[pl.sp], pot = POTS[slot.type], need = NEED[sp.need];
+    const ev = evaluate(slot, season, state.weather);
+    pl.health = clamp(pl.health + ev.dh, 0, 100);
+    if (pl.health <= 0) { pl.dead = true; notes.push(`${sp.name}没能撑过去，枯萎了。`); return; }
+    if (!pl.matured) {
+      const sf = sp.grow.includes(season) ? 1.15 : season === 3 ? 0.4 : 0.85;
+      const g = ev.q * sf * pot.grow * (0.5 + 0.5 * pl.health / 100) * 100 / sp.days;
+      pl.progress = Math.min(100, pl.progress + g);
+      if (pl.progress >= 100) {
+        pl.matured = true;
+        const first = !state.dex[sp.id], before = myLevel();
+        state.dex[sp.id] = (+state.dex[sp.id] || 0) + 1;
+        state.xp += sp.xp;
+        notes.push(`${sp.name}长大了！经验 +${sp.xp}${first ? '，图鉴新解锁' : ''}。`);
+        const after = myLevel();
+        if (after > before) {
+          const un = PLANTS.filter(x => x.lv > before && x.lv <= after).map(x => x.name);
+          notes.push(`升到 Lv.${after} ${title(after)}！${un.length ? '新解锁：' + un.join('、') + '。' : ''}`);
+        }
+      }
+    }
+    pl.age++;
+    const hot = (!slot.indoor && state.weather === '高温') ? 1.4 : 1;
+    pl.water = Math.max(0, pl.water - WATER_DECAY * need.mul * SEASON_DRY[season] * pot.dry * hot * (slot.indoor ? 0.8 : 1));
+    pl.nutr = Math.max(0, pl.nutr - FEED[sp.feed].decay);
+    pl.soil = Math.max(0, pl.soil - 9 * pot.compact);
+    pl.done = {};
+  });
+  state.day++;
+  menu = null;
+  const ns = seasonOf(state.day);
+  if (ns !== season) { notes.unshift(SEASON_TIPS[ns]); if (ns === 0) notes.unshift(`新的一年，第 ${yearOf(state.day)} 年开始了。`); }
+  state.weather = state.forecast; state.temp = state.ftemp;
+  state.forecast = rollWeather(state.day + 1);
+  state.ftemp = rollTemp(seasonOf(state.day + 1), state.forecast);
+  const outside = state.pots.filter(s => s && s.plant && !s.plant.dead && !s.indoor);
+  if (state.weather === '小雨' || state.weather === '雷阵雨') {
+    const add = state.weather === '小雨' ? 22 : 32, what = state.weather === '小雨' ? '下了场小雨' : '一场雷阵雨';
+    outside.forEach(s => s.plant.water = Math.min(130, s.plant.water + add));
+    const soaked = outside.filter(s => s.plant.water > NEED[SP[s.plant.sp].need].range[1]).map(s => SP[s.plant.sp].name);
+    if (soaked.length) notes.push(`${what}，${[...new Set(soaked)].join('、')}的土太湿了。可以倒掉积水，或者搬进屋。`);
+    else if (outside.length) notes.push(`${what}，阳台上的盆土都喝了些水。`);
+  } else if (state.weather === '雪') {
+    outside.forEach(s => s.plant.water = Math.min(130, s.plant.water + 6));
+  } else if (state.weather === '霜冻') {
+    const hurt = [];
+    outside.forEach(s => {
+      const sp = SP[s.plant.sp];
+      if (dormant(sp, ns)) return;
+      const loss = sp.hardy ? 4 : 12;
+      s.plant.health = Math.max(1, s.plant.health - loss); hurt.push(`${sp.name} −${loss}`);
+    });
+    const name = ns === 2 ? '霜降了，夜里结了霜' : '夜里打霜';
+    if (hurt.length) notes.push(`${name}，阳台上的植物冻着了：${hurt.join('、')}。`);
+    else notes.push(`${name}，好在怕冷的都在屋里。`);
+  } else if (state.weather === '高温' && outside.length) {
+    notes.push('今天高温，阳台上的水干得特别快。');
+  }
+  notes.forEach(addLog);
+  commit();
+  const head = `${dayLabel(state.day)} · ${state.weather} ${state.temp}°C`;
+  toast(notes.length ? `${head} — ${notes[0]}` : `${head} — 新的一天。`);
+}
+
+function commit() { save(); render(); }
+
+/* ================= drawing helpers ================= */
+function rng(seed) { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+const hsl = (c, dl = 0, a = 1) => `hsla(${c[0]},${c[1]}%,${clamp(c[2] + dl, 0, 100)}%,${a})`;
+const mixC = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
+function leafCol(c, v, dl = 0) {
+  if (v.dead) return `hsl(30,26%,${clamp(34 + dl, 0, 100)}%)`;
+  let [h, s, l] = c;
+  h = h + (48 - h) * v.y * 0.7; s = s * (1 - v.y * 0.35); l = l + v.y * 8 + dl;
+  return `hsl(${h},${s}%,${clamp(l, 0, 100)}%)`;
+}
+function flCol(c, v, dl = 0) { return v.dead ? `hsl(30,20%,${40 + dl}%)` : `hsl(${c[0]},${c[1] * (1 - v.y * 0.4)}%,${clamp(c[2] + dl, 0, 100)}%)`; }
+function dot(c, x, y, r) { c.beginPath(); c.arc(x, y, Math.max(0.1, r), 0, TAU); c.fill(); }
+function ell(c, x, y, rx, ry, rot = 0) { c.beginPath(); c.ellipse(x, y, Math.max(0.1, rx), Math.max(0.1, ry), rot, 0, TAU); c.fill(); }
+function rr(c, x, y, w, h, r) { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
+function qpt(x0, y0, cx, cy, x1, y1, t) { const u = 1 - t; return [u * u * x0 + 2 * u * t * cx + t * t * x1, u * u * y0 + 2 * u * t * cy + t * t * y1]; }
+function qang(x0, y0, cx, cy, x1, y1, t) { return Math.atan2(2 * (1 - t) * (cy - y0) + 2 * t * (y1 - cy), 2 * (1 - t) * (cx - x0) + 2 * t * (x1 - cx)); }
+function curve(c, col, w, x0, y0, cx, cy, x1, y1) { c.strokeStyle = col; c.lineWidth = w; c.lineCap = 'round'; c.beginPath(); c.moveTo(x0, y0); c.quadraticCurveTo(cx, cy, x1, y1); c.stroke(); }
+function line(c, col, w, x0, y0, x1, y1) { c.strokeStyle = col; c.lineWidth = w; c.lineCap = 'round'; c.beginPath(); c.moveTo(x0, y0); c.lineTo(x1, y1); c.stroke(); }
+function leaf(c, x, y, len, w, ang, col) {
+  c.save(); c.translate(x, y); c.rotate(ang); c.beginPath(); c.moveTo(0, 0);
+  c.quadraticCurveTo(len * 0.45, -w, len, 0); c.quadraticCurveTo(len * 0.45, w, 0, 0); c.fillStyle = col; c.fill(); c.restore();
+}
+// a tapering limb along a quadratic curve
+function taper(c, x0, y0, cx, cy, x1, y1, w0, w1, fill) {
+  const N = 12, A = [], B = [];
+  for (let i = 0; i <= N; i++) {
+    const t = i / N, [x, y] = qpt(x0, y0, cx, cy, x1, y1, t), a = qang(x0, y0, cx, cy, x1, y1, t), w = (w0 + (w1 - w0) * t) / 2;
+    const nx = Math.cos(a + Math.PI / 2), ny = Math.sin(a + Math.PI / 2);
+    A.push([x + nx * w, y + ny * w]); B.push([x - nx * w, y - ny * w]);
+  }
+  c.beginPath(); c.moveTo(A[0][0], A[0][1]); A.forEach(p => c.lineTo(p[0], p[1]));
+  for (let i = B.length - 1; i >= 0; i--) c.lineTo(B[i][0], B[i][1]);
+  c.closePath(); c.fillStyle = fill; c.fill();
+  dot(c, x1, y1, w1 / 2);
+}
+function leafShape(c, shape, x, y, s, a, col) {
+  c.fillStyle = col;
+  if (shape === 'fan') {
+    c.save(); c.translate(x, y); c.rotate(a); c.beginPath(); c.moveTo(0, 0); c.arc(0, 0, s * 1.35, -0.75, 0.75); c.closePath(); c.fill(); c.restore();
+  } else if (shape === 'star') {
+    c.save(); c.translate(x, y); c.rotate(a + Math.PI / 2); c.beginPath();
+    for (let k = 0; k < 10; k++) { const r = k % 2 ? s * 0.42 : s * 1.15, aa = -Math.PI / 2 + k * Math.PI / 5; c.lineTo(Math.cos(aa) * r, Math.sin(aa) * r - s * 0.5); }
+    c.closePath(); c.fill(); c.restore();
+  } else if (shape === 'narrow') leaf(c, x, y, s * 2, s * 0.45, a, col);
+  else leaf(c, x, y, s * 1.6, s * 0.68, a, col);
+}
+function blossom5(c, x, y, r, col, center) {
+  c.fillStyle = col;
+  for (let p = 0; p < 5; p++) { const a = p / 5 * TAU; dot(c, x + Math.cos(a) * r * 0.6, y + Math.sin(a) * r * 0.6, r * 0.55); }
+  if (center) { c.fillStyle = center; dot(c, x, y, r * 0.3); }
+}
+const droopA = (a, d) => a + (Math.PI / 2 - a) * d * 0.45;
+
+/* ---------- pots & soil ---------- */
+const BX = 100, BY = 160;
+function drawPot(c, type) {
+  c.save();
+  if (type === 'clay') {
+    const g = c.createLinearGradient(50, 0, 150, 0); g.addColorStop(0, '#a4502e'); g.addColorStop(0.45, '#cf7a4f'); g.addColorStop(1, '#9c4a2a');
+    c.fillStyle = g; c.beginPath(); c.moveTo(50, 166); c.lineTo(150, 166); c.lineTo(139, 212); c.lineTo(61, 212); c.closePath(); c.fill();
+    c.fillStyle = 'rgba(0,0,0,.15)'; c.fillRect(52, 166, 96, 4);
+    c.fillStyle = '#d4845b'; rr(c, 43, 153, 114, 14, 4); c.fill();
+    c.fillStyle = 'rgba(255,255,255,.18)'; rr(c, 46, 155, 108, 3, 2); c.fill();
+  } else if (type === 'celadon') {
+    const g = c.createLinearGradient(46, 0, 154, 0); g.addColorStop(0, '#6f9e8b'); g.addColorStop(0.4, '#b8d9c9'); g.addColorStop(1, '#6a9886');
+    c.fillStyle = g; c.beginPath(); c.moveTo(46, 162); c.bezierCurveTo(46, 202, 72, 213, 100, 213); c.bezierCurveTo(128, 213, 154, 202, 154, 162); c.closePath(); c.fill();
+    c.strokeStyle = 'rgba(60,90,80,.25)'; c.lineWidth = 0.6;
+    [[70, 175, 82, 196], [118, 172, 128, 190], [96, 185, 104, 205]].forEach(([a, b, d, e]) => { c.beginPath(); c.moveTo(a, b); c.lineTo((a + d) / 2 + 3, (b + e) / 2); c.lineTo(d, e); c.stroke(); });
+    c.fillStyle = 'rgba(255,255,255,.35)'; ell(c, 68, 182, 4, 14, 0.2);
+    c.fillStyle = '#a9cebc'; ell(c, 100, 161, 56, 8); c.fillStyle = 'rgba(0,0,0,.08)'; ell(c, 100, 163, 52, 6);
+  } else if (type === 'wood') {
+    c.fillStyle = '#ad8051'; c.fillRect(44, 156, 112, 56);
+    c.strokeStyle = 'rgba(80,50,25,.45)'; c.lineWidth = 1;
+    for (let x = 60; x < 156; x += 16) { c.beginPath(); c.moveTo(x, 156); c.lineTo(x, 212); c.stroke(); }
+    c.fillStyle = '#7a5532'; c.fillRect(42, 166, 116, 5); c.fillRect(42, 199, 116, 5);
+    c.fillStyle = 'rgba(255,255,255,.12)'; c.fillRect(44, 156, 112, 3);
+  } else {
+    const g = c.createLinearGradient(36, 0, 164, 0); g.addColorStop(0, '#55302a'); g.addColorStop(0.45, '#8a5442'); g.addColorStop(1, '#52302a');
+    c.fillStyle = '#4a2b24'; c.fillRect(46, 206, 14, 6); c.fillRect(140, 206, 14, 6);
+    c.fillStyle = g; rr(c, 37, 164, 126, 44, 9); c.fill();
+    c.fillStyle = '#7b4737'; rr(c, 32, 154, 136, 13, 5); c.fill();
+    c.strokeStyle = 'rgba(255,220,190,.18)'; c.lineWidth = 1; c.beginPath(); c.moveTo(48, 186); c.lineTo(152, 186); c.stroke();
+  }
+  c.restore();
+}
+const SOIL_RX = { clay: 50, celadon: 51, wood: 55, zisha: 62 };
+function drawSoil(c, slot, pl, wx) {
+  const rx = SOIL_RX[slot.type];
+  let col = '#5b3f2a';
+  if (pl) { if (pl.water > 70) col = '#3a2718'; else if (pl.water < 25) col = '#8a6a4c'; }
+  c.fillStyle = col; ell(c, BX, BY, rx, 6.5);
+  c.fillStyle = 'rgba(255,255,255,.08)';
+  for (let i = 0; i < 12; i++) dot(c, BX - rx + 8 + ((i * 37) % (rx * 2 - 16)), BY - 2 + ((i * 13) % 5), 0.9);
+  if (pl && pl.water > 100) { c.fillStyle = 'rgba(120,170,220,.6)'; ell(c, BX + 10, BY + 1, rx * 0.6, 3.4); c.fillStyle = 'rgba(255,255,255,.4)'; ell(c, BX + 2, BY, rx * 0.2, 1); }
+  if (pl && pl.soil < 25) {
+    c.strokeStyle = 'rgba(30,18,10,.6)'; c.lineWidth = 0.8;
+    [[-30, -1, -18, 3, -8, 1], [10, -3, 22, 1, 34, -1], [-6, 2, 4, 4, 14, 3]].forEach(([a, b, d, e, f, g]) => { c.beginPath(); c.moveTo(BX + a, BY + b); c.lineTo(BX + d, BY + e); c.lineTo(BX + f, BY + g); c.stroke(); });
+  }
+  if (!slot.indoor && (wx === '雪' || wx === '霜冻')) { c.fillStyle = 'rgba(250,252,255,.85)'; ell(c, BX - 18, BY - 1, rx * 0.45, 3.4); ell(c, BX + 22, BY + 1, rx * 0.35, 2.8); }
+}
+function drawWindow(c) {
+  c.save();
+  c.fillStyle = 'rgba(160,195,225,.16)'; rr(c, 128, 22, 58, 70, 4); c.fill();
+  c.strokeStyle = 'rgba(130,115,90,.4)'; c.lineWidth = 2.5; rr(c, 128, 22, 58, 70, 4); c.stroke();
+  c.lineWidth = 1.5; c.beginPath(); c.moveTo(157, 22); c.lineTo(157, 92); c.moveTo(128, 57); c.lineTo(186, 57); c.stroke();
+  c.fillStyle = 'rgba(255,255,255,.18)'; c.beginPath(); c.moveTo(134, 30); c.lineTo(146, 30); c.lineTo(136, 50); c.closePath(); c.fill();
+  c.fillStyle = 'rgba(130,115,90,.25)'; c.fillRect(124, 92, 66, 3);
+  c.restore();
+}
+
+/* ---------- flowers ---------- */
+function drawFlower(c, type, x, y, r, color, v) {
+  const C = (dl = 0) => flCol(color, v, dl);
+  switch (type) {
+    case 'rose': {
+      c.fillStyle = C(-8);
+      for (let i = 0; i < 5; i++) { const a = i / 5 * TAU + 0.3; dot(c, x + Math.cos(a) * r * 0.5, y + Math.sin(a) * r * 0.5, r * 0.52); }
+      c.fillStyle = C(0); dot(c, x, y, r * 0.62);
+      c.strokeStyle = C(-22); c.lineWidth = 0.9; c.beginPath(); c.arc(x, y, r * 0.38, 0.3, 4.9); c.stroke();
+      c.beginPath(); c.arc(x + r * 0.08, y - r * 0.04, r * 0.18, 1.2, 6.2); c.stroke();
+      break;
+    }
+    case 'star': {
+      c.fillStyle = C(0); c.strokeStyle = 'rgba(120,120,90,.35)'; c.lineWidth = 0.5;
+      for (let i = 0; i < 5; i++) { const a = i / 5 * TAU - Math.PI / 2; c.beginPath(); c.ellipse(x + Math.cos(a) * r * 0.5, y + Math.sin(a) * r * 0.5, r * 0.55, r * 0.26, a, 0, TAU); c.fill(); c.stroke(); }
+      c.fillStyle = 'hsl(50,80%,60%)'; dot(c, x, y, r * 0.17);
+      break;
+    }
+    case 'gardenia': {
+      c.strokeStyle = 'rgba(140,130,90,.35)'; c.lineWidth = 0.5;
+      for (let ring = 0; ring < 2; ring++) {
+        const n = ring ? 5 : 6, rad = ring ? r * 0.3 : r * 0.55, pr = ring ? r * 0.38 : r * 0.55;
+        c.fillStyle = C(ring ? 2 : -3);
+        for (let i = 0; i < n; i++) { const a = i / n * TAU + ring * 0.5; c.beginPath(); c.ellipse(x + Math.cos(a) * rad, y + Math.sin(a) * rad, pr, pr * 0.55, a, 0, TAU); c.fill(); c.stroke(); }
+      }
+      c.fillStyle = 'hsl(55,60%,75%)'; dot(c, x, y, r * 0.14);
+      break;
+    }
+    case 'tulip': {
+      c.fillStyle = C(0); c.beginPath();
+      c.moveTo(x - r * 0.65, y - r * 1.2); c.quadraticCurveTo(x - r * 0.8, y, x, y); c.quadraticCurveTo(x + r * 0.8, y, x + r * 0.65, y - r * 1.2);
+      c.lineTo(x + r * 0.3, y - r * 0.8); c.lineTo(x, y - r * 1.35); c.lineTo(x - r * 0.3, y - r * 0.8); c.closePath(); c.fill();
+      c.strokeStyle = C(-15); c.lineWidth = 0.9; c.beginPath(); c.moveTo(x, y - r * 1.3); c.quadraticCurveTo(x - r * 0.3, y - r * 0.5, x, y - 0.5); c.stroke();
+      break;
+    }
+    case 'hya': {
+      for (let k = 0; k < 11; k++) {
+        const yy = y - k * r * 0.24, xx = x + (k % 2 ? 1 : -1) * r * 0.32 * (1 - k / 14), fr = r * 0.3 * (1 - k / 22);
+        c.fillStyle = C(k % 3 === 0 ? 8 : 0);
+        for (let p = 0; p < 5; p++) { const a = p / 5 * TAU; dot(c, xx + Math.cos(a) * fr * 0.55, yy + Math.sin(a) * fr * 0.55, fr * 0.5); }
+        c.fillStyle = C(20); dot(c, xx, yy, fr * 0.25);
+      }
+      break;
+    }
+    case 'sun': {
+      c.fillStyle = C(0);
+      for (let i = 0; i < 16; i++) { const a = i / 16 * TAU; c.beginPath(); c.ellipse(x + Math.cos(a) * r * 0.78, y + Math.sin(a) * r * 0.78, r * 0.38, r * 0.15, a, 0, TAU); c.fill(); }
+      c.fillStyle = v.dead ? 'hsl(25,25%,25%)' : 'hsl(25,55%,22%)'; dot(c, x, y, r * 0.52);
+      c.fillStyle = 'rgba(255,200,120,.35)';
+      for (let i = 0; i < 14; i++) { const a = i * 2.4, d = Math.sqrt(i / 14) * r * 0.45; dot(c, x + Math.cos(a) * d, y + Math.sin(a) * d, 0.8); }
+      break;
+    }
+    case 'ball': {
+      for (let i = 0; i < 22; i++) {
+        const a = i * 2.39996, d = Math.sqrt(i / 22) * r * 0.85, fx = x + Math.cos(a) * d, fy = y + Math.sin(a) * d * 0.9, fr = r * 0.2;
+        c.fillStyle = C((i % 4) * 4 - 6);
+        for (let p = 0; p < 4; p++) { const b = p / 4 * TAU + i; dot(c, fx + Math.cos(b) * fr * 0.55, fy + Math.sin(b) * fr * 0.55, fr * 0.55); }
+      }
+      break;
+    }
+    case 'lav': case 'mintfl': {
+      const n = type === 'lav' ? 9 : 6;
+      for (let k = 0; k < n; k++) { c.fillStyle = C(k % 2 ? 6 : -4); ell(c, x + (k % 2 ? 1.2 : -1.2), y - k * r * 0.26, r * 0.22, r * 0.17); }
+      break;
+    }
+    case 'pom': {
+      c.strokeStyle = C(0); c.lineWidth = 0.8;
+      for (let i = 0; i < 24; i++) { const a = i / 24 * TAU; c.beginPath(); c.moveTo(x, y); c.lineTo(x + Math.cos(a) * r, y + Math.sin(a) * r); c.stroke(); }
+      c.fillStyle = C(12);
+      for (let i = 0; i < 24; i++) { const a = i / 24 * TAU; dot(c, x + Math.cos(a) * r, y + Math.sin(a) * r, 0.9); }
+      break;
+    }
+    case 'cactus': {
+      for (let k = 0; k < 11; k++) { const a = -Math.PI + 0.15 + k * (Math.PI - 0.3) / 10; c.fillStyle = C(k % 2 ? 6 : -2); c.beginPath(); c.ellipse(x + Math.cos(a) * r * 0.5, y + Math.sin(a) * r * 0.5, r * 0.55, r * 0.2, a, 0, TAU); c.fill(); }
+      c.fillStyle = C(-6); ell(c, x, y + 1, r * 0.35, r * 0.25);
+      c.fillStyle = 'hsl(52,85%,60%)'; dot(c, x, y - r * 0.15, r * 0.14);
+      break;
+    }
+    case 'daisy': {
+      c.fillStyle = C(0);
+      for (let i = 0; i < 14; i++) { const a = i / 14 * TAU; c.beginPath(); c.ellipse(x + Math.cos(a) * r * 0.55, y + Math.sin(a) * r * 0.55 * 0.7, r * 0.5, r * 0.1, a, 0, TAU); c.fill(); }
+      c.fillStyle = C(-20); dot(c, x, y, r * 0.22);
+      break;
+    }
+  }
+}
+function bud(c, x, y, r, color, v) {
+  c.fillStyle = leafCol([110, 40, 35], v); ell(c, x, y - r * 0.6, r * 0.6, r);
+  c.fillStyle = flCol(color, v, -5); ell(c, x, y - r * 1.15, r * 0.35, r * 0.5);
+}
+function tip(c, pl, sp, x, y, S, v, season, r, ang = -Math.PI / 2) {
+  if (v.dead) { c.fillStyle = 'hsl(30,25%,30%)'; dot(c, x, y, 2.2); return; }
+  if (isBlooming(pl, sp, season)) drawFlower(c, sp.fl, x, y, (6 + 4 * S) * (0.85 + r * 0.3), sp.color, v);
+  else if (pl.progress >= 70 && sp.bloom) bud(c, x, y, 2.5 + S * 2, sp.color, v);
+  else { leaf(c, x, y, 5 + 4 * S, 2.6, ang - 0.5, leafCol(sp.leaf, v, 6)); leaf(c, x, y, 5 + 4 * S, 2.6, ang + 0.5, leafCol(sp.leaf, v, 6)); }
+}
+
+/* ---------- plant forms ---------- */
+const STEM = [105, 32, 30];
+const FORMS = {
+  bush(c, pl, sp, S, v, sw, season, R) {
+    const n = 3 + Math.round(S * 3), stems = [];
+    for (let i = 0; i < n; i++) {
+      const off = n > 1 ? i / (n - 1) - 0.5 : 0;
+      const a = -Math.PI / 2 + off * 1.5 * (0.8 + R() * 0.4);
+      const len = (26 + 64 * S) * (0.72 + R() * 0.32);
+      let x1 = BX + Math.cos(a) * len + sw * len * 0.05, y1 = BY + Math.sin(a) * len;
+      y1 += v.droop * len * 0.35; x1 += (x1 - BX) * v.droop * 0.4;
+      stems.push({ x1, y1, cx: BX + Math.cos(a) * len * 0.25, cy: BY + Math.sin(a) * len * 0.6, fr: R(), lr: R() });
+    }
+    for (const s of stems) {
+      curve(c, leafCol(STEM, v), 1.3 + S * 1.2, BX, BY, s.cx, s.cy, s.x1, s.y1);
+      for (let j = 1; j <= 4; j++) {
+        const t = 0.15 + j * 0.18, [x, y] = qpt(BX, BY, s.cx, s.cy, s.x1, s.y1, t), a = qang(BX, BY, s.cx, s.cy, s.x1, s.y1, t);
+        const side = (j + (s.lr > 0.5 ? 1 : 0)) % 2 ? 1 : -1;
+        leaf(c, x, y, 7 + 7 * S, 2.8 + 2.4 * S, droopA(a + side * 0.95, v.droop), leafCol(sp.leaf, v, j % 2 ? 0 : 5));
+      }
+    }
+    for (const s of stems) tip(c, pl, sp, s.x1, s.y1, S, v, season, s.fr);
+  },
+  single(c, pl, sp, S, v, sw, season, R) {
+    const k = 2 + Math.round(S * 2);
+    for (let i = 0; i < k; i++) {
+      const side = i % 2 ? 1 : -1, a = -Math.PI / 2 + side * (0.25 + i * 0.12 + R() * 0.1);
+      leaf(c, BX + side * 2, BY, (20 + 36 * S) * (0.85 + R() * 0.25), 3.5 + 3 * S, droopA(a, v.droop), leafCol(sp.leaf, v, i * 3));
+    }
+    const m = S > 0.75 ? 2 : 1;
+    for (let j = 0; j < m; j++) {
+      const h = (26 + 62 * S) * (1 - 0.15 * j), x0 = BX + (j ? 7 : -2);
+      const x1 = x0 + sw * h * 0.05 + (j ? 6 : 0) + v.droop * 14, y1 = BY - h + v.droop * h * 0.4;
+      curve(c, leafCol(sp.leaf, v, -6), 1.6 + S, x0, BY, x0, BY - h * 0.5, x1, y1);
+      if (v.dead) { c.fillStyle = 'hsl(30,25%,30%)'; dot(c, x1, y1, 2.4); }
+      else if (isBlooming(pl, sp, season)) drawFlower(c, sp.fl, x1, y1, 7 + 5 * S, sp.color, v);
+      else if (pl.progress >= 70) bud(c, x1, y1, 3 + 2 * S, sp.color, v);
+    }
+  },
+  tall(c, pl, sp, S, v, sw, season) {
+    const h = 30 + 92 * S, x1 = BX + sw * h * 0.04 + v.droop * 10, y1 = BY - h + v.droop * h * 0.15;
+    const cx = BX - 4, cy = BY - h * 0.5;
+    curve(c, leafCol([95, 40, 34], v), 2 + 3 * S, BX, BY, cx, cy, x1, y1);
+    [0.22, 0.4, 0.58, 0.74].forEach((t, i) => {
+      if (t > 0.3 + S * 0.6) return;
+      const [x, y] = qpt(BX, BY, cx, cy, x1, y1, t), side = i % 2 ? 1 : -1;
+      leaf(c, x, y, 12 + 13 * S, 7 + 6 * S, droopA(-Math.PI / 2 + side * 1.05, v.droop + 0.15), leafCol(sp.leaf, v, i * 2));
+    });
+    if (v.dead) { c.fillStyle = 'hsl(30,25%,28%)'; dot(c, x1, y1 + 4, 6 * S + 2); return; }
+    if (isBlooming(pl, sp, season)) drawFlower(c, 'sun', x1, y1 + v.droop * 8, 9 + 12 * S, sp.color, v);
+    else if (pl.progress >= 70) { c.fillStyle = leafCol([95, 45, 36], v); dot(c, x1, y1, 6 + 3 * S); c.fillStyle = flCol(sp.color, v, -10); dot(c, x1, y1 - 1, 2.5); }
+    else { leaf(c, x1, y1, 7, 3, -Math.PI / 2 - 0.6, leafCol(sp.leaf, v, 6)); leaf(c, x1, y1, 7, 3, -Math.PI / 2 + 0.6, leafCol(sp.leaf, v, 6)); }
+  },
+  ball(c, pl, sp, S, v, sw, season, R) {
+    const n = 4 + Math.round(S * 3), tips = [];
+    for (let i = 0; i < n; i++) {
+      const off = i / (n - 1) - 0.5, a = -Math.PI / 2 + off * 1.9;
+      const len = (22 + 42 * S) * (0.75 + R() * 0.3);
+      const x1 = BX + Math.cos(a) * len + sw * len * 0.04 + (Math.cos(a) * len) * v.droop * 0.3, y1 = BY + Math.sin(a) * len + v.droop * len * 0.3;
+      const cx = BX + Math.cos(a) * len * 0.3, cy = BY + Math.sin(a) * len * 0.7;
+      curve(c, leafCol(STEM, v), 1.6 + S, BX, BY, cx, cy, x1, y1);
+      [0.45, 0.75].forEach((t, j) => { const [x, y] = qpt(BX, BY, cx, cy, x1, y1, t); const aa = qang(BX, BY, cx, cy, x1, y1, t); leaf(c, x, y, 10 + 8 * S, 6 + 4 * S, droopA(aa + (j ? 1 : -1), v.droop), leafCol(sp.leaf, v, j * 5)); });
+      tips.push([x1, y1, R()]);
+    }
+    tips.forEach(([x, y, r]) => {
+      if (v.dead) { c.fillStyle = 'hsl(30,20%,35%)'; dot(c, x, y, 3); }
+      else if (isBlooming(pl, sp, season)) drawFlower(c, 'ball', x, y, (10 + 7 * S) * (0.85 + r * 0.3), sp.color, v);
+      else if (pl.progress >= 70) { c.fillStyle = leafCol([90, 45, 55], v); dot(c, x, y, 4 + 2 * S); }
+      else leaf(c, x, y, 8 + 4 * S, 4 + 2 * S, -Math.PI / 2 + (r - 0.5), leafCol(sp.leaf, v, 7));
+    });
+  },
+  spike(c, pl, sp, S, v, sw, season, R) {
+    for (let i = 0; i < 10; i++) { const side = i % 2 ? 1 : -1; leaf(c, BX + side * (i * 1.4), BY, 9 + 8 * S, 1.6, droopA(-Math.PI / 2 + side * (0.4 + R() * 0.7), v.droop), leafCol(sp.leaf, v, (i % 3) * 3)); }
+    const n = 7 + Math.round(10 * S), bloom = isBlooming(pl, sp, season);
+    for (let i = 0; i < n; i++) {
+      const off = i / (n - 1) - 0.5, a = -Math.PI / 2 + off * 1.0 + (R() - 0.5) * 0.15;
+      const len = (26 + 58 * S) * (0.8 + R() * 0.25);
+      const x1 = BX + Math.cos(a) * len + sw * len * 0.06, y1 = BY + Math.sin(a) * len + v.droop * len * 0.3;
+      curve(c, leafCol(sp.leaf, v, -10), 0.9, BX, BY, BX + Math.cos(a) * len * 0.3, BY + Math.sin(a) * len * 0.6, x1, y1);
+      if (v.dead) continue;
+      if (bloom) drawFlower(c, 'lav', x1, y1 + 6, 6 + 3 * S, sp.color, v);
+      else if (pl.progress >= 60) { c.fillStyle = leafCol([110, 20, 50], v); ell(c, x1, y1 + 3, 1.4, 4); }
+    }
+  },
+  blades(c, pl, sp, S, v, sw, season, R) {
+    const n = 14 + Math.round(22 * S);
+    for (let i = 0; i < n; i++) {
+      const x0 = BX + (R() - 0.5) * 80 * (0.45 + S * 0.55), len = (16 + 58 * S) * (0.7 + R() * 0.4);
+      const lean = (R() - 0.5) * 0.5 + sw * 0.04 + (x0 - BX) * 0.004;
+      const x1 = x0 + Math.sin(lean) * len + v.droop * (R() - 0.3) * 20, y1 = BY - Math.cos(lean) * len * (1 - v.droop * 0.45);
+      curve(c, leafCol(sp.leaf, v, (R() - 0.5) * 14), 2.1, x0, BY, x0 + Math.sin(lean) * len * 0.3, BY - len * 0.6, x1, y1);
+    }
+  },
+  arching(c, pl, sp, S, v, sw, season, R) {
+    if (pl.progress >= 75 && !v.dead) {
+      [-1, 1].forEach(side => {
+        const ex = BX + side * (62 + 10 * S), ey = 196;
+        curve(c, leafCol([80, 30, 55], v), 1, BX, BY - 4, BX + side * 52, 118 + sw, ex, ey);
+        for (let k = 0; k < 5; k++) { const a = -Math.PI / 2 + (k - 2) * 0.55; curve(c, leafCol(sp.leaf, v), 2.2, ex, ey, ex + Math.cos(a) * 5, ey + Math.sin(a) * 8, ex + Math.cos(a) * 10, ey + Math.sin(a) * 5 + 4); }
+      });
+    }
+    const n = 8 + Math.round(10 * S);
+    for (let i = 0; i < n; i++) {
+      const side = i % 2 ? 1 : -1, spread = R(), len = (18 + 46 * S) * (0.7 + R() * 0.45);
+      const x1 = BX + side * len * (0.3 + spread * 0.7) + sw * 1.5, y1 = BY - len * (0.85 - spread * 0.95) + v.droop * 18;
+      const cx = BX + side * len * 0.15, cy = BY - len * (1 - spread * 0.25);
+      curve(c, leafCol(sp.leaf, v), 3.6, BX, BY, cx, cy, x1, y1);
+      curve(c, v.dead ? 'hsl(35,20%,55%)' : 'hsl(60,40%,86%)', 1, BX, BY, cx, cy, x1, y1);
+    }
+  },
+  foxtail(c, pl, sp, S, v, sw, season, R) {
+    for (let i = 0; i < 8 + Math.round(8 * S); i++) {
+      const x0 = BX + (R() - 0.5) * 30, len = (14 + 30 * S) * (0.7 + R() * 0.5), side = R() < 0.5 ? -1 : 1;
+      curve(c, leafCol(sp.leaf, v, (R() - 0.5) * 10), 1.8, x0, BY, x0 + side * len * 0.3, BY - len * 0.8, x0 + side * len * 0.75, BY - len * (0.55 - v.droop * 0.4));
+    }
+    const n = 3 + Math.round(3 * S);
+    const tailC = season === 2 ? [45, 60, 62] : season === 3 ? [35, 28, 60] : [85, 40, 55];
+    for (let i = 0; i < n; i++) {
+      const off = n > 1 ? i / (n - 1) - 0.5 : 0, len = (30 + 64 * S) * (0.8 + R() * 0.25);
+      const x1 = BX + off * 50 + sw * len * 0.06, y1 = BY - len * (1 - v.droop * 0.25);
+      const cx = BX + off * 15, cy = BY - len * 0.6;
+      curve(c, leafCol(sp.leaf, v, -5), 1, BX + off * 6, BY, cx, cy, x1, y1);
+      if (pl.progress < 55) continue;
+      const dir = off >= 0 ? 1 : -1, tl = 10 + 8 * S;
+      for (let k = 0; k < 16; k++) {
+        const t = k / 15, px = x1 + dir * Math.sin(t * 1.4) * tl * 0.6, py = y1 + (t - 0.2) * tl * 0.55 - Math.sin(t * Math.PI) * 3;
+        const ba = -Math.PI / 2 + dir * t * 1.2;
+        c.strokeStyle = v.dead ? 'hsl(35,25%,55%)' : hsl(tailC, (k % 3) * 4); c.lineWidth = 0.9;
+        for (let b = -1; b <= 1; b++) { const aa = ba + b * 1.1; c.beginPath(); c.moveTo(px, py); c.lineTo(px + Math.cos(aa) * 3.2, py + Math.sin(aa) * 3.2); c.stroke(); }
+      }
+    }
+  },
+  coins(c, pl, sp, S, v, sw, season, R) {
+    const n = 4 + Math.round(8 * S), items = [];
+    for (let i = 0; i < n; i++) {
+      const x0 = BX + (R() - 0.5) * 30, h = (12 + 48 * S) * (0.55 + R() * 0.5), lean = (R() - 0.5) * 0.9;
+      const x1 = x0 + Math.sin(lean) * h * 0.7 + sw * h * 0.03 + v.droop * lean * 20, y1 = BY - h * (1 - v.droop * 0.35);
+      items.push({ x0, x1, y1, h, r: R() });
+    }
+    items.sort((a, b) => a.y1 - b.y1);
+    items.forEach(it => {
+      curve(c, leafCol([95, 40, 45], v), 1, it.x0, BY, it.x0, BY - it.h * 0.5, it.x1, it.y1);
+      const r = (5 + 4 * S) * (0.85 + it.r * 0.3), tilt = (it.r - 0.5) * 0.4;
+      c.fillStyle = leafCol(sp.leaf, v, -6); ell(c, it.x1, it.y1 + 1, r, r * 0.6, tilt);
+      c.fillStyle = leafCol(sp.leaf, v, 2); ell(c, it.x1, it.y1, r * 0.95, r * 0.56, tilt);
+      c.strokeStyle = leafCol(sp.leaf, v, 18); c.lineWidth = 0.5;
+      for (let k = 0; k < 8; k++) { const a = k / 8 * TAU; c.beginPath(); c.moveTo(it.x1, it.y1); c.lineTo(it.x1 + Math.cos(a) * r * 0.85, it.y1 + Math.sin(a) * r * 0.48); c.stroke(); }
+    });
+  },
+  sword(c, pl, sp, S, v, sw, season, R) {
+    const n = 3 + Math.round(5 * S);
+    for (let i = 0; i < n; i++) {
+      const off = n > 1 ? i / (n - 1) - 0.5 : 0, x0 = BX + off * 34, len = (28 + 84 * S) * (0.72 + R() * 0.35), w = 5 + 4 * S;
+      const a = -Math.PI / 2 + off * 0.3 + sw * 0.006 + v.droop * off * 0.8;
+      c.save(); c.translate(x0, BY); c.rotate(a);
+      c.beginPath(); c.moveTo(0, -w / 2); c.quadraticCurveTo(len * 0.6, -w * 0.62, len, 0); c.quadraticCurveTo(len * 0.6, w * 0.62, 0, w / 2); c.closePath();
+      c.fillStyle = leafCol(sp.leaf, v); c.fill();
+      c.strokeStyle = v.dead ? 'hsl(35,25%,50%)' : 'hsl(55,70%,62%)'; c.lineWidth = 1.1; c.stroke();
+      c.save(); c.clip(); c.strokeStyle = leafCol(sp.leaf, v, 16); c.lineWidth = 1;
+      for (let x = 6; x < len - 6; x += 6.5) { c.beginPath(); c.moveTo(x, -w); c.lineTo(x + 2, -w * 0.3); c.lineTo(x - 1, w * 0.3); c.lineTo(x + 1.5, w); c.stroke(); }
+      c.restore(); c.restore();
+    }
+  },
+  pairs(c, pl, sp, S, v, sw, season, R) {
+    const n = 3 + Math.round(3 * S), bloom = isBlooming(pl, sp, season);
+    for (let i = 0; i < n; i++) {
+      const off = n > 1 ? i / (n - 1) - 0.5 : 0, x0 = BX + off * 18, a = -Math.PI / 2 + off * 0.7;
+      const len = (18 + 52 * S) * (0.8 + R() * 0.3);
+      const x1 = x0 + Math.cos(a) * len + sw * len * 0.05 + v.droop * off * 30, y1 = BY + Math.sin(a) * len + v.droop * len * 0.35;
+      const cx = x0 + Math.cos(a) * len * 0.4, cy = BY + Math.sin(a) * len * 0.6;
+      curve(c, leafCol([110, 30, 32], v), 1.3, x0, BY, cx, cy, x1, y1);
+      const nodes = 2 + Math.round(4 * S);
+      for (let k = 0; k < nodes; k++) {
+        const t = (k + 1) / (nodes + 0.4), [x, y] = qpt(x0, BY, cx, cy, x1, y1, t), aa = qang(x0, BY, cx, cy, x1, y1, t), sz = (6 + 4 * S) * (1 - t * 0.35);
+        leaf(c, x, y, sz, sz * 0.55, droopA(aa - 1.25, v.droop), leafCol(sp.leaf, v, k % 2 * 4));
+        leaf(c, x, y, sz, sz * 0.55, droopA(aa + 1.25, v.droop), leafCol(sp.leaf, v, k % 2 * 4 + 2));
+      }
+      if (bloom) drawFlower(c, 'mintfl', x1, y1, 7, sp.color, v);
+      else { leaf(c, x1, y1, 5, 2.6, a - 0.4, leafCol(sp.leaf, v, 8)); leaf(c, x1, y1, 5, 2.6, a + 0.4, leafCol(sp.leaf, v, 8)); }
+    }
+  },
+  feather(c, pl, sp, S, v, sw, season, R, now) {
+    const since = now - (pl.touched || -1e9);
+    let f = since < 3500 ? 1 : since < 5500 ? 1 - (since - 3500) / 2000 : 0;
+    if (v.dead || pl.water < 10) f = Math.max(f, 0.8);
+    const n = 2 + Math.round(2 * S), bloom = isBlooming(pl, sp, season);
+    for (let i = 0; i < n; i++) {
+      const off = n > 1 ? i / (n - 1) - 0.5 : 0, a = -Math.PI / 2 + off * 0.9;
+      const len = (22 + 58 * S) * (0.85 + R() * 0.2);
+      const x1 = BX + Math.cos(a) * len + sw * len * 0.05, y1 = BY + Math.sin(a) * len;
+      const cx = BX + Math.cos(a) * len * 0.3, cy = BY + Math.sin(a) * len * 0.65;
+      curve(c, leafCol([20, 30, 38], v), 1.2, BX, BY, cx, cy, x1, y1);
+      const fronds = 2 + Math.round(2 * S);
+      for (let k = 0; k < fronds; k++) {
+        const t = 0.35 + k * (0.6 / fronds), [x, y] = qpt(BX, BY, cx, cy, x1, y1, t), side = (k + i) % 2 ? 1 : -1;
+        const ra = -Math.PI / 2 + side * (0.8 + f * 0.9) + v.droop * side * 0.4, rl = 13 + 9 * S;
+        const ex = x + Math.cos(ra) * rl, ey = y + Math.sin(ra) * rl;
+        line(c, leafCol([95, 30, 38], v), 0.8, x, y, ex, ey);
+        for (let p = 1; p <= 8; p++) {
+          const q = p / 9, px = x + (ex - x) * q, py = y + (ey - y) * q, ll = 3.6 * (1 - f * 0.6);
+          const la = 1.45 * (1 - f) + 0.25 * f;
+          leaf(c, px, py, ll, 0.9, ra - la, leafCol(sp.leaf, v, p % 2 * 4));
+          leaf(c, px, py, ll, 0.9, ra + la, leafCol(sp.leaf, v, p % 2 * 4));
+        }
+      }
+      if (bloom) drawFlower(c, 'pom', x1, y1 - 3, 5 + 2 * S, sp.color, v);
+    }
+  },
+  cloud(c, pl, sp, S, v, sw, season, R) {
+    const n = 2 + Math.round(3 * S);
+    for (let i = 0; i < n; i++) {
+      const off = n > 1 ? i / (n - 1) - 0.5 : 0, len = (24 + 64 * S) * (0.75 + R() * 0.3);
+      let px = BX + off * 8, py = BY;
+      const segs = 3 + Math.round(2 * S), nodes = [];
+      c.strokeStyle = leafCol([90, 25, 40], v); c.lineWidth = 0.9; c.beginPath(); c.moveTo(px, py);
+      for (let k = 0; k < segs; k++) { px += off * 14 + (k % 2 ? 2.5 : -2.5) + sw * 0.4; py -= len / segs * (1 - v.droop * 0.3); c.lineTo(px, py); nodes.push([px, py, R()]); }
+      c.stroke();
+      nodes.forEach(([x, y, r], k) => {
+        const wdt = (12 + 14 * S) * (1 - k / (segs + 2)), dir = (k + i) % 2 ? 1 : -1, cxp = x + dir * wdt * 0.45;
+        c.fillStyle = leafCol(sp.leaf, v, 8); c.globalAlpha = 0.35; ell(c, cxp, y - 1, wdt * 0.55, 2.6 + S); c.globalAlpha = 1;
+        c.strokeStyle = leafCol(sp.leaf, v, (k % 2) * 6); c.lineWidth = 0.7;
+        for (let m = 0; m < 22; m++) {
+          const ux = cxp + (((m * 7.3 + r * 13) % 10) / 10 - 0.5) * wdt, uy = y - 1 + (((m * 3.7 + r * 5) % 10) / 10 - 0.5) * (4 + 2 * S) + v.droop * 2;
+          const ua = (m % 5) * 0.6 + r;
+          c.beginPath(); c.moveTo(ux, uy); c.lineTo(ux + Math.cos(ua) * 2.6, uy + Math.sin(ua) * 1.2); c.stroke();
+        }
+      });
+    }
+  },
+  // ---- succulents ----
+  aloe(c, pl, sp, S, v, sw, season, R) {
+    const n = 5 + Math.round(8 * S), order = [];
+    for (let i = 0; i < n; i++) { const off = n > 1 ? i / (n - 1) - 0.5 : 0; order.push({ off, r: R(), r2: R() }); }
+    order.sort((a, b) => Math.abs(b.off) - Math.abs(a.off));
+    for (const o of order) {
+      const a = -Math.PI / 2 + o.off * 2.5 + sw * 0.008, len = (18 + 48 * S) * (1 - Math.abs(o.off) * 0.45) * (0.85 + o.r * 0.25), w = 4 + 4.5 * S;
+      c.save(); c.translate(BX, BY); c.rotate(a + v.droop * o.off * 0.6);
+      c.fillStyle = leafCol(sp.leaf, v, Math.abs(o.off) * -10); c.beginPath(); c.moveTo(0, -w); c.quadraticCurveTo(len * 0.6, -w * 0.8, len, 0); c.quadraticCurveTo(len * 0.6, w * 0.8, 0, w); c.closePath(); c.fill();
+      c.fillStyle = leafCol(sp.leaf, v, 18);
+      for (let k = 1; k < 6; k++) { const x = len * k / 7; c.beginPath(); c.moveTo(x, -w * (1 - k / 7) * 0.85); c.lineTo(x + 2, -w * (1 - k / 7) * 0.85 - 1.8); c.lineTo(x + 3, -w * (1 - (k + 0.4) / 7) * 0.82); c.fill(); }
+      c.fillStyle = 'rgba(255,255,255,.28)'; for (let k = 0; k < 4; k++) ell(c, len * (0.25 + k * 0.15), (o.r2 - 0.5) * w * 0.6 + (k % 2 ? 1.5 : -1.5), 1.4, 0.8);
+      c.restore();
+    }
+  },
+  barrel(c, pl, sp, S, v, sw, season) {
+    const r = 8 + 20 * S, shr = 1 - v.droop * 0.15, cx = BX, cy = BY - r * 0.8;
+    const g = c.createRadialGradient(cx - r * 0.35, cy - r * 0.4, r * 0.1, cx, cy, r * 1.1);
+    g.addColorStop(0, leafCol(sp.leaf, v, 16)); g.addColorStop(1, leafCol(sp.leaf, v, -8));
+    c.fillStyle = g; ell(c, cx, cy, r * shr, r);
+    const ribs = [-0.72, -0.36, 0, 0.36, 0.72];
+    c.strokeStyle = leafCol(sp.leaf, v, -14); c.lineWidth = 0.9;
+    ribs.forEach(k => { c.beginPath(); c.moveTo(cx, cy - r); c.quadraticCurveTo(cx + k * r * 1.35 * shr, cy, cx + k * r * 0.2, cy + r * 0.95); c.stroke(); });
+    ribs.forEach(k => {
+      for (let j = 1; j <= 3; j++) {
+        const [x, y] = qpt(cx, cy - r, cx + k * r * 1.35 * shr, cy, cx + k * r * 0.2, cy + r * 0.95, j / 4.2);
+        c.fillStyle = 'rgba(255,255,240,.9)'; dot(c, x, y, 1);
+        c.strokeStyle = v.dead ? 'rgba(200,180,150,.8)' : 'rgba(250,240,200,.9)'; c.lineWidth = 0.5;
+        for (let s2 = 0; s2 < 3; s2++) { const a = -Math.PI / 2 + (s2 - 1) * 0.9 + k * 1.4; c.beginPath(); c.moveTo(x, y); c.lineTo(x + Math.cos(a) * 3.4, y + Math.sin(a) * 3.4); c.stroke(); }
+      }
+    });
+    if (isBlooming(pl, sp, season)) drawFlower(c, 'cactus', cx, cy - r + 1, 9 + 4 * S, sp.color, v);
+  },
+  paddle(c, pl, sp, S, v, sw, season) {
+    const rx0 = 6 + 8 * S, ry0 = 10 + 13 * S, pads = [{ x: BX, y: BY - ry0 * 0.9, rx: rx0, ry: ry0, a: sw * 0.01 }];
+    if (S > 0.45) pads.push({ x: BX - rx0 * 0.75, y: BY - ry0 * 2.25, rx: rx0 * 0.85, ry: ry0 * 0.85, a: -0.45 });
+    if (S > 0.6) pads.push({ x: BX + rx0 * 0.8, y: BY - ry0 * 2.15, rx: rx0 * 0.8, ry: ry0 * 0.8, a: 0.5 });
+    if (S > 0.85) pads.push({ x: BX - rx0 * 1.35, y: BY - ry0 * 3.5, rx: rx0 * 0.7, ry: ry0 * 0.7, a: -0.3 });
+    const bloom = isBlooming(pl, sp, season);
+    for (let i = pads.length - 1; i >= 0; i--) {
+      const p = pads[i];
+      c.save(); c.translate(p.x, p.y); c.rotate(p.a + sw * 0.01 * i + v.droop * (i ? 0.25 * Math.sign(p.a) : 0));
+      c.fillStyle = leafCol(sp.leaf, v, -7); ell(c, 1, 1.5, p.rx, p.ry);
+      c.fillStyle = leafCol(sp.leaf, v, 0); ell(c, 0, 0, p.rx * 0.95, p.ry * 0.97);
+      c.fillStyle = leafCol(sp.leaf, v, 10); ell(c, -p.rx * 0.3, -p.ry * 0.25, p.rx * 0.35, p.ry * 0.5);
+      c.fillStyle = v.dead ? 'rgba(210,190,150,.8)' : 'rgba(250,235,170,.95)';
+      for (let gy = -3; gy <= 3; gy++) for (let gx = -2; gx <= 2; gx++) {
+        const x = gx * p.rx * 0.38 + (gy % 2 ? p.rx * 0.19 : 0), y = gy * p.ry * 0.27;
+        if ((x * x) / (p.rx * p.rx) + (y * y) / (p.ry * p.ry) < 0.75) dot(c, x, y, 0.75);
+      }
+      if (bloom && i === pads.length - 1) { drawFlower(c, 'cactus', -p.rx * 0.35, -p.ry * 0.92, 6 + 2 * S, sp.color, v); drawFlower(c, 'cactus', p.rx * 0.4, -p.ry * 0.85, 5 + 2 * S, sp.color, v); }
+      c.restore();
+    }
+  },
+  window(c, pl, sp, S, v, sw, season, R) {
+    const n = 9 + Math.round(9 * S), leaves = [];
+    for (let i = 0; i < n; i++) { const f = n > 1 ? i / (n - 1) - 0.5 : 0; leaves.push({ f, a: -Math.PI / 2 + f * 2.7 + (R() - 0.5) * 0.15, len: (10 + 22 * S) * (1 - Math.abs(f) * 0.35) * (0.85 + R() * 0.3) }); }
+    leaves.sort((a, b) => Math.abs(b.f) - Math.abs(a.f));
+    const w = 4 + 5 * S;
+    leaves.forEach(L => {
+      const a = L.a + v.droop * Math.cos(L.a) * 0.4, ox = BX, oy = BY - 1;
+      c.fillStyle = leafCol(sp.leaf, v, -4 - Math.abs(L.f) * 8); ell(c, ox + Math.cos(a) * L.len * 0.55, oy + Math.sin(a) * L.len * 0.55, L.len * 0.55, w, a);
+      c.fillStyle = v.dead ? 'rgba(210,190,150,.45)' : 'rgba(215,250,230,.6)'; ell(c, ox + Math.cos(a) * L.len * 0.8, oy + Math.sin(a) * L.len * 0.8, L.len * 0.26, w * 0.72, a);
+      c.strokeStyle = 'rgba(255,255,255,.55)'; c.lineWidth = 0.5;
+      for (const d of [-0.35, 0, 0.35]) { const nx = Math.cos(a + Math.PI / 2) * w * d, ny = Math.sin(a + Math.PI / 2) * w * d; c.beginPath(); c.moveTo(ox + Math.cos(a) * L.len * 0.62 + nx, oy + Math.sin(a) * L.len * 0.62 + ny); c.lineTo(ox + Math.cos(a) * L.len * 1.02, oy + Math.sin(a) * L.len * 1.02); c.stroke(); }
+    });
+  },
+  bearpaw(c, pl, sp, S, v, sw, season, R) {
+    const n = 2 + Math.round(2 * S);
+    for (let i = 0; i < n; i++) {
+      const f = n > 1 ? i / (n - 1) - 0.5 : 0, x0 = BX + f * 18, h = (8 + 34 * S) * (0.8 + R() * 0.3), a = -Math.PI / 2 + f * 0.7;
+      const x1 = x0 + Math.cos(a) * h + sw * 0.6, y1 = BY + Math.sin(a) * h;
+      line(c, leafCol([60, 25, 45], v), 2.2, x0, BY, x1, y1);
+      const pairs = 1 + Math.round(2 * S);
+      for (let k = 0; k <= pairs; k++) {
+        const t = k === pairs ? 1 : 0.4 + k * (0.55 / pairs), x = x0 + (x1 - x0) * t, y = BY + (y1 - BY) * t;
+        for (const side of [-1, 1]) {
+          const ang = a + side * (k === pairs ? 0.45 : 1.0 - k * 0.12) + v.droop * side * 0.5, len = (7 + 9 * S) * (k === pairs ? 0.8 : 1), w = 3.5 + 4 * S;
+          c.save(); c.translate(x, y); c.rotate(ang);
+          c.fillStyle = leafCol(sp.leaf, v, -6); ell(c, len * 0.6, 0.8, len * 0.62, w);
+          c.fillStyle = leafCol(sp.leaf, v, 2); ell(c, len * 0.58, 0, len * 0.58, w * 0.9);
+          c.fillStyle = 'rgba(255,255,255,.35)'; dot(c, len * 0.4, -w * 0.3, 0.8); dot(c, len * 0.7, w * 0.2, 0.7);
+          if (!v.dead) { c.fillStyle = 'hsl(2,70%,45%)'; for (let tt = -1; tt <= 1; tt++) dot(c, len * 1.14, tt * w * 0.45, 0.95); }
+          c.restore();
+        }
+      }
+    }
+  },
+  stone(c, pl, sp, S, v, sw, season) {
+    const count = S > 0.7 ? 2 : 1, bloom = isBlooming(pl, sp, season);
+    for (let i = 0; i < count; i++) {
+      const x = BX + (count > 1 ? (i ? 17 : -17) * S : 0), rx = 7 + 12 * S, ry = (6 + 12 * S) * (1 - v.droop * 0.3), y = BY - ry * 0.55;
+      c.fillStyle = leafCol(sp.leaf, v, -10); ell(c, x, y + 1.5, rx, ry);
+      c.fillStyle = leafCol(sp.leaf, v, 0); ell(c, x, y, rx * 0.96, ry * 0.95);
+      c.fillStyle = leafCol(sp.top, v, 4); ell(c, x, y - ry * 0.4, rx * 0.85, ry * 0.42);
+      c.fillStyle = leafCol(sp.top, v, -10);
+      for (let k = 0; k < 9; k++) { const a = k * 2.3, d = (k % 3 + 1) / 3.5; dot(c, x + Math.cos(a) * rx * 0.7 * d, y - ry * 0.4 + Math.sin(a) * ry * 0.32 * d, 0.9); }
+      line(c, 'rgba(40,25,15,.65)', 1.2, x, y - ry * 0.85, x, y + ry * 0.2);
+      c.fillStyle = 'rgba(255,255,255,.2)'; ell(c, x - rx * 0.45, y - ry * 0.35, rx * 0.22, ry * 0.25);
+      if (bloom) drawFlower(c, 'daisy', x, y - ry * 0.75, 7 + 4 * S, sp.color, v);
+    }
+  },
+  rosette(c, pl, sp, S, v, sw, season) {
+    const cx = BX, cy = BY - 5 - 6 * S, R0 = 8 + 30 * S;
+    if (isBlooming(pl, sp, season)) {
+      const ex = cx + R0 + 12, ey = cy - 30 - 22 * S;
+      curve(c, hsl([20, 40, 50]), 1.3, cx + R0 * 0.5, cy, cx + R0 + 4, cy - 20, ex, ey);
+      for (let k = 0; k < 5; k++) { const [x, y] = qpt(cx + R0 * 0.5, cy, cx + R0 + 4, cy - 20, ex, ey, 0.6 + k * 0.1); c.fillStyle = flCol(sp.color, v, k * 3); ell(c, x + 3, y + 2, 2.2, 3); }
+    }
+    [[1, 11], [0.74, 9], [0.5, 7], [0.28, 5]].forEach(([f, n], ri) => {
+      const as = [];
+      for (let k = 0; k < n; k++) as.push(k / n * TAU + ri * 0.35);
+      as.sort((a, b) => Math.sin(a) - Math.sin(b));
+      as.forEach(a => {
+        const rad = R0 * f, lift = (1 - f) * R0 * 0.32;
+        const ex = cx + Math.cos(a) * rad, ey = cy + Math.sin(a) * rad * 0.42 - lift + v.droop * 3;
+        const bx = cx + Math.cos(a) * rad * 0.15, by = cy - lift * 0.8;
+        const ang = Math.atan2(ey - by, ex - bx), len = Math.hypot(ex - bx, ey - by) + 3 + 3 * S, w = (3 + 6 * S) * (0.7 + f * 0.4);
+        c.save(); c.translate(bx, by); c.rotate(ang);
+        c.beginPath(); c.moveTo(0, -w * 0.4); c.quadraticCurveTo(len * 0.7, -w * 1.2, len, 0); c.quadraticCurveTo(len * 0.7, w * 1.2, 0, w * 0.4); c.closePath();
+        const lg = c.createLinearGradient(0, 0, len, 0);
+        lg.addColorStop(0, leafCol(sp.leaf, v, -8)); lg.addColorStop(0.7, leafCol(sp.leaf, v, 5)); lg.addColorStop(1, v.dead ? leafCol(sp.leaf, v, 0) : flCol(sp.tip, v, 0));
+        c.fillStyle = lg; c.fill();
+        c.strokeStyle = 'rgba(255,255,255,.25)'; c.lineWidth = 0.5; c.stroke();
+        c.restore();
+      });
+    });
+  },
+  jade(c, pl, sp, S, v, sw, season, R) {
+    const bark = v.dead ? 'hsl(30,15%,30%)' : 'hsl(35,22%,38%)';
+    const H = 10 + 34 * S, topX = BX + sw * 0.6, topY = BY - H;
+    taper(c, BX, BY, BX - 3, BY - H * 0.5, topX, topY, 3 + 6 * S, 2 + 2 * S, bark);
+    const ends = [], nb = S < 0.4 ? 1 : S < 0.7 ? 3 : 4;
+    if (nb === 1) ends.push([topX, topY]);
+    else for (let i = 0; i < nb; i++) {
+      const f = i / (nb - 1) - 0.5, ex = topX + f * (22 + 26 * S), ey = topY - (8 + 16 * S) * (1 - Math.abs(f) * 0.9) + (R() - 0.5) * 4;
+      taper(c, topX, topY, topX + f * 10, topY - 6, ex, ey, 2 + 2 * S, 1.4, bark); ends.push([ex, ey]);
+    }
+    ends.forEach(([x, y]) => {
+      const m = 5 + Math.round(3 * S);
+      for (let k = 0; k < m; k++) {
+        const f = k / (m - 1) - 0.5, a = -Math.PI / 2 + f * 2.7 + (R() - 0.5) * 0.2 + v.droop * f * 0.6, len = (6 + 8 * S) * (0.85 + R() * 0.3);
+        c.save(); c.translate(x, y); c.rotate(a);
+        c.fillStyle = leafCol(sp.leaf, v, -2); ell(c, len * 0.62, 0, len * 0.62, len * 0.42);
+        c.strokeStyle = v.dead ? 'hsl(30,20%,40%)' : 'hsl(355,55%,45%)'; c.lineWidth = 0.7; c.stroke();
+        c.fillStyle = 'rgba(255,255,255,.22)'; ell(c, len * 0.5, -len * 0.12, len * 0.25, len * 0.12);
+        c.restore();
+      }
+      if (isBlooming(pl, sp, season)) for (let k = 0; k < 5; k++) blossom5(c, x + (k - 2) * 3, y - 10 - (k % 2) * 3, 1.6, flCol(sp.color, v), 'hsl(340,40%,70%)');
+    });
+  },
+  // ---- trees ----
+  tree(c, pl, sp, S, v, sw, season, R, now) {
+    if (S < 0.36) return sapling(c, pl, sp, S, v, sw, season);
+    const g = (S - 0.36) / 0.64, shape = sp.shape;
+    let rx, ry, trunkH;
+    if (shape === 'umbrella') { rx = 22 + 34 * g; ry = 12 + 17 * g; trunkH = 26 + 30 * g; }
+    else if (shape === 'vase') { rx = 18 + 30 * g; ry = 14 + 22 * g; trunkH = 22 + 26 * g; }
+    else if (shape === 'cone') { rx = 12 + 18 * g; ry = 18 + 34 * g; trunkH = 20 + 18 * g; }
+    else { rx = 20 + 26 * g; ry = 18 + 24 * g; trunkH = 22 + 24 * g; }
+    const lean = (R() - 0.5) * 8;
+    const topX = BX + lean + sw * 1.4 * g, topY = BY - trunkH;
+    const ccx = topX, ccy = topY - ry * 0.55;
+    const wb = 3 + 8 * g, wt = 2 + 3.5 * g;
+    const barkC = v.dead ? [30, 12, 30] : sp.bark;
+    // limbs
+    const limbs = [];
+    if (shape === 'cone') {
+      const lx = ccx + sw * 0.8, ly = ccy - ry * 0.85;
+      limbs.push({ x0: topX, y0: topY, cx: topX, cy: (topY + ly) / 2, x1: lx, y1: ly, w0: wt, w1: 1 });
+      const n = 3 + Math.round(3 * g);
+      for (let i = 0; i < n; i++) {
+        const t = (i + 0.5) / n, x0 = topX + (lx - topX) * t * 0.9, y0 = topY + (ly - topY) * t * 0.9, side = i % 2 ? 1 : -1, len = rx * (1 - t * 0.55) * (0.8 + R() * 0.3);
+        limbs.push({ x0, y0, cx: x0 + side * len * 0.5, cy: y0 - 3, x1: x0 + side * len, y1: y0 - len * 0.5, w0: wt * (1 - t * 0.5) * 0.7, w1: 0.9 });
+      }
+    } else {
+      const n = 3 + (g > 0.5 ? 1 : 0) + (shape === 'umbrella' ? 1 : 0);
+      for (let i = 0; i < n; i++) {
+        const f = n > 1 ? i / (n - 1) - 0.5 : 0;
+        const x1 = ccx + f * rx * 1.45 + (R() - 0.5) * 6, y1 = ccy + Math.abs(f) * ry * 0.55 - ry * 0.35 + (R() - 0.5) * 6;
+        const spread = shape === 'vase' ? 0.15 : 0.3;
+        limbs.push({ x0: topX, y0: topY, cx: topX + f * rx * spread, cy: topY - ry * 0.4, x1, y1, w0: wt * (1 - Math.abs(f) * 0.4), w1: 1 });
+      }
+    }
+    const twigs = [];
+    limbs.forEach(L => {
+      const base = Math.atan2(L.y1 - L.cy, L.x1 - L.cx);
+      for (let j = 0; j < 2; j++) {
+        const a = clamp(base + (j ? 0.6 : -0.6) + (R() - 0.5) * 0.3, -Math.PI + 0.2, -0.2), len = (6 + 10 * g) * (0.7 + R() * 0.5);
+        twigs.push([L.x1, L.y1, L.x1 + Math.cos(a) * len, L.y1 + Math.sin(a) * len]);
+      }
+    });
+    // clumps of foliage
+    const cr = 6 + 6 * g, clumps = [];
+    limbs.forEach(L => clumps.push({ x: L.x1, y: L.y1, r: cr * (0.9 + R() * 0.3) }));
+    twigs.forEach(t => clumps.push({ x: t[2], y: t[3], r: cr * (0.7 + R() * 0.3) }));
+    const N = 9 + Math.round(12 * g);
+    for (let k = 0; k < N; k++) { const a = R() * TAU, d = Math.sqrt(R()); clumps.push({ x: ccx + Math.cos(a) * d * (rx - cr * 0.6), y: ccy + Math.sin(a) * d * (ry - cr * 0.5), r: cr * (0.75 + R() * 0.5) }); }
+    clumps.forEach(cl => { cl.keep = R(); cl.mix = R(); cl.ph = R(); });
+    clumps.sort((a, b) => a.y - b.y);
+
+    // trunk with root flare and a soft bark gradient
+    const tg = c.createLinearGradient(BX - wb, 0, BX + wb, 0);
+    tg.addColorStop(0, hsl(barkC, 10)); tg.addColorStop(0.55, hsl(barkC, 0)); tg.addColorStop(1, hsl(barkC, -8));
+    c.fillStyle = hsl(barkC, -4);
+    c.beginPath(); c.moveTo(BX - wb * 0.5 - 4, BY + 1); c.quadraticCurveTo(BX - wb * 0.4, BY - 2, BX - wb * 0.3, BY - 7); c.lineTo(BX + wb * 0.3, BY - 7); c.quadraticCurveTo(BX + wb * 0.4, BY - 2, BX + wb * 0.5 + 4, BY + 1); c.closePath(); c.fill();
+    taper(c, BX, BY, BX - lean * 0.3, BY - trunkH * 0.5, topX, topY, wb, wt, tg);
+    c.strokeStyle = hsl(barkC, -12, 0.5); c.lineWidth = 0.6;
+    for (let k = 0; k < 3; k++) { const y = BY - 8 - k * trunkH * 0.25, x = BX + lean * (k * 0.1) + (k - 1) * wb * 0.18; c.beginPath(); c.moveTo(x, y); c.lineTo(x + 0.6, y - 6); c.stroke(); }
+    limbs.forEach(L => taper(c, L.x0, L.y0, L.cx, L.cy, L.x1, L.y1, L.w0, L.w1, hsl(barkC, 4)));
+    twigs.forEach(t => line(c, hsl(barkC, 6), 0.9, t[0], t[1], t[2], t[3]));
+
+    const dec = !sp.leaves[3];
+    const leafC = v.dead ? null : sp.leaves[season];
+    const bloom = isBlooming(pl, sp, season), fruit = isFruiting(pl, sp, season);
+    const cover = bloom && sp.blossom && sp.blossom.cover;
+    const density = cover ? 1 : leafC ? (dec && season === 0 ? 0.65 : 1) : 0;
+    const scale = dec && season === 0 && !cover ? 0.82 : 1;
+    const vis = clumps.filter(cl => cl.keep <= density);
+    const paint = (cl, dl) => {
+      if (cover) return cl.mix < 0.12 ? leafCol(sp.leaves[0], v, dl) : flCol(sp.blossom.color, v, dl * 0.7);
+      let base = leafC;
+      if (dec && season === 2) base = mixC(sp.leaves[1], leafC, clamp(0.45 + cl.mix * 0.9, 0, 1));
+      return leafCol(base, v, dl);
+    };
+    if (vis.length) {
+      vis.forEach(cl => { c.fillStyle = paint(cl, -11); dot(c, cl.x + 1.2, cl.y + 2.2, cl.r * scale); });
+      vis.forEach(cl => { c.fillStyle = paint(cl, 0); dot(c, cl.x, cl.y, cl.r * scale * 0.88); });
+      vis.forEach(cl => { c.fillStyle = paint(cl, 9); dot(c, cl.x - cl.r * 0.28, cl.y - cl.r * 0.32, cl.r * scale * 0.5); });
+      vis.forEach(cl => {
+        for (let e = 0; e < 6; e++) {
+          const a = -Math.PI * 0.95 + e * (Math.PI * 0.9 / 5) + (cl.ph - 0.5) * 0.6;
+          const px = cl.x + Math.cos(a) * cl.r * scale * 0.9, py = cl.y + Math.sin(a) * cl.r * scale * 0.9;
+          if (cover) blossom5(c, px, py, 1.7 + 0.8 * g, paint(cl, e % 2 ? 8 : 3), 'hsla(340,60%,60%,.8)');
+          else leafShape(c, sp.lf, px, py, 2.4 + 1.6 * g, a, paint(cl, e % 2 ? 9 : 3));
+        }
+      });
+    }
+    if (bloom && !cover && !v.dead) {
+      const col = sp.blossom.color;
+      (vis.length ? vis : clumps).forEach((cl, i) => {
+        if (sp.blossom.tiny) {
+          for (let k = 0; k < 7; k++) { const a = i + k * 0.9, d = cl.r * (0.25 + (k % 3) * 0.2); c.fillStyle = hsl(col, k % 2 ? 8 : 0); dot(c, cl.x + Math.cos(a) * d, cl.y + cl.r * 0.2 + Math.sin(a) * d * 0.6, 1.1); }
+        } else {
+          for (let k = 0; k < 3; k++) { const a = i * 1.7 + k * 2.3, d = cl.r * (0.3 + k * 0.22); blossom5(c, cl.x + Math.cos(a) * d, cl.y + Math.sin(a) * d, 1.8 + 1.2 * g, flCol(col, v, k * 3), sp.id === 'pomegranate' ? 'hsl(45,90%,55%)' : 'hsl(50,80%,60%)'); }
+        }
+      });
+    }
+    if (fruit) {
+      vis.forEach((cl, i) => {
+        if (i % 2) return;
+        const fx2 = cl.x + (cl.ph - 0.5) * cl.r, fy = cl.y + cl.r * 0.55, fr = 2.2 + 2.2 * g, k = sp.fruit.kind;
+        c.fillStyle = hsl(sp.fruit.color);
+        if (k === 'lemon') ell(c, fx2, fy, fr * 0.8, fr * 1.05, 0.3);
+        else dot(c, fx2, fy, fr);
+        if (k === 'peach') { c.fillStyle = 'hsla(350,70%,60%,.55)'; dot(c, fx2 + fr * 0.3, fy, fr * 0.6); }
+        if (k === 'pom') { c.fillStyle = hsl(sp.fruit.color, -12); c.beginPath(); c.moveTo(fx2 - 1.5, fy - fr); c.lineTo(fx2, fy - fr - 2); c.lineTo(fx2 + 1.5, fy - fr); c.fill(); }
+        c.fillStyle = 'rgba(255,255,255,.4)'; dot(c, fx2 - fr * 0.35, fy - fr * 0.35, fr * 0.28);
+      });
+    }
+    if (season === 3 && !v.dead) {
+      if (vis.length) { c.fillStyle = 'rgba(250,252,255,.92)'; vis.forEach(cl => { if (cl.y < ccy) ell(c, cl.x, cl.y - cl.r * 0.62, cl.r * 0.7, cl.r * 0.26); }); }
+      else {
+        limbs.forEach(L => { const [mx, my] = qpt(L.x0, L.y0, L.cx, L.cy, L.x1, L.y1, 0.5); curve(c, 'rgba(250,252,255,.9)', 1.5, mx, my - L.w0 * 0.4, (mx + L.x1) / 2, (my + L.y1) / 2 - 1.5, L.x1, L.y1 - 1); });
+        twigs.forEach(t => { line(c, hsl(barkC, 8), 0.6, t[2], t[3], t[2] + (t[2] - t[0]) * 0.4 + 2, t[3] + (t[3] - t[1]) * 0.4 - 2); });
+      }
+    }
+    const drift = !reduce && !v.dead && vis.length && ((cover && season === 0) || (dec && season === 2));
+    if (drift) {
+      const col = cover ? sp.blossom.color : sp.leaves[2];
+      for (let k = 0; k < 7; k++) {
+        const ph = (now / 7000 + k / 7 + pl.id * 0.13) % 1, t0 = vis[(k * 5) % vis.length];
+        const x = t0.x + Math.sin(ph * 6 + k) * 8 + ph * 18, y = t0.y + ph * (BY - t0.y + 8);
+        if (cover) { c.fillStyle = hsl(col, 0, 1 - ph); ell(c, x, y, 2, 1.2, ph * 9 + k); }
+        else leafShape(c, sp.lf, x, y, 2.4, ph * 9 + k, hsl(col, 0, 1 - ph));
+      }
+    }
+  },
+  pine(c, pl, sp, S, v, sw, season, R) {
+    const H = 26 + 86 * S, top = [BX + 10 * S + sw * 0.8, BY - H];
+    const cx = BX - 26 * S, cy = BY - H * 0.5;
+    const barkC = v.dead ? [30, 12, 30] : sp.bark;
+    const tg = c.createLinearGradient(BX - 30, 0, BX + 10, 0); tg.addColorStop(0, hsl(barkC, 10)); tg.addColorStop(1, hsl(barkC, -6));
+    taper(c, BX, BY, cx, cy, top[0], top[1], 3 + 9 * S, 1.5 + 1.5 * S, tg);
+    const tiers = S < 0.35 ? 1 : S < 0.6 ? 2 : S < 0.85 ? 3 : 4, pads = [];
+    for (let i = 0; i < tiers; i++) {
+      const t = 0.42 + i * (0.5 / tiers), [x, y] = qpt(BX, BY, cx, cy, top[0], top[1], t), side = i % 2 ? 1 : -1;
+      const px = x + side * (14 + 18 * S), py = y - 5;
+      taper(c, x, y, x + side * 6, y - 8, px, py, 1.5 + 2.5 * S, 1, hsl(barkC, 4));
+      pads.push([px, py, 13 + 12 * S]);
+    }
+    pads.push([top[0], top[1], 12 + 10 * S]);
+    const leafC = v.dead ? [30, 26, 34] : sp.leaves[season];
+    pads.forEach(([x, y, rx]) => {
+      const ry = rx * 0.38;
+      c.fillStyle = leafCol(leafC, v, -9); ell(c, x + 1, y + 2, rx, ry);
+      for (let k = 0; k < 5; k++) { c.fillStyle = leafCol(leafC, v, 0); ell(c, x + (k - 2) * rx * 0.36, y + Math.abs(k - 2) * 0.6, rx * 0.34, ry * 0.85); }
+      c.fillStyle = leafCol(leafC, v, 9); ell(c, x - rx * 0.2, y - ry * 0.45, rx * 0.55, ry * 0.4);
+      c.strokeStyle = leafCol(leafC, v, 12); c.lineWidth = 0.7;
+      for (let k = 0; k < 18; k++) {
+        const fx = (k / 17) * 2 - 1, nx = x + fx * rx * 0.92, ny = y - ry * 0.85 * Math.sqrt(Math.max(0, 1 - fx * fx));
+        const a = -Math.PI / 2 + fx * 0.9; c.beginPath(); c.moveTo(nx, ny); c.lineTo(nx + Math.cos(a) * 3, ny + Math.sin(a) * 3); c.stroke();
+      }
+      if (season === 3 && !v.dead) { c.fillStyle = 'rgba(250,252,255,.92)'; ell(c, x, y - ry * 0.75, rx * 0.8, ry * 0.4); }
+    });
+  },
+};
+function sapling(c, pl, sp, S, v, sw, season) {
+  const h = 16 + (S - 0.22) * 150, x1 = BX + sw * 1.2, y1 = BY - h;
+  curve(c, v.dead ? 'hsl(30,15%,32%)' : hsl(sp.bark, 12), 1.6 + S * 2.4, BX, BY, BX - 3, BY - h * 0.5, x1, y1);
+  const leafC = v.dead ? [30, 26, 34] : sp.leaves[season];
+  if (!leafC) {
+    c.fillStyle = hsl(sp.bark, 18);
+    for (let k = 1; k <= 3; k++) { const [x, y] = qpt(BX, BY, BX - 3, BY - h * 0.5, x1, y1, k / 3.3); dot(c, x + (k % 2 ? 1.5 : -1.5), y, 1.3); }
+    if (season === 3) { c.fillStyle = 'rgba(250,252,255,.9)'; ell(c, x1, y1 - 1, 2.5, 1.2); }
+    return;
+  }
+  const n = 4 + Math.round((S - 0.22) * 20);
+  for (let i = 0; i < n; i++) {
+    const t = 0.35 + i / n * 0.6, [x, y] = qpt(BX, BY, BX - 3, BY - h * 0.5, x1, y1, t), side = i % 2 ? 1 : -1;
+    leafShape(c, sp.lf || 'narrow', x, y, 4 + S * 6, droopA(-Math.PI / 2 + side * 0.95, v.droop), leafCol(leafC, v, i % 2 * 5));
+  }
+  leafShape(c, sp.lf || 'narrow', x1, y1, 4.5 + S * 6, -Math.PI / 2, leafCol(leafC, v, 7));
+}
+
+function visOf(pl, sp) {
+  const [lo] = NEED[sp.need].range;
+  let y = (1 - pl.health / 100) * 0.8;
+  if (pl.nutr < 15) y += 0.35;
+  if (pl.water > 100) y += 0.25;
+  let droop = pl.water < Math.min(15, lo) ? 0.25 + (15 - pl.water) / 15 * 0.65 : pl.water < lo - 12 ? 0.15 : 0;
+  if (pl.dead) { y = 1; droop = 1; }
+  return { y: Math.min(1, y), droop: clamp(droop, 0, 1), dead: pl.dead };
+}
+
+function drawPlant(c, pl, sp, season, now, wig = 0) {
+  const S = 0.22 + 0.78 * clamp(pl.progress / 100, 0, 1);
+  const v = visOf(pl, sp);
+  const amp = reduce ? 0 : (v.dead ? 0.2 : 1);
+  const sw = Math.sin(now / 900 + pl.id * 1.7) * amp + wig;
+  const R = rng(pl.id * 9973 + 17);
+  c.save();
+  FORMS[sp.form](c, pl, sp, S, v, sw, season, R, now);
+  c.restore();
+}
+
+function heart(c, x, y, s) { c.beginPath(); c.moveTo(x, y + s * 0.35); c.bezierCurveTo(x - s, y - s * 0.3, x - s * 0.45, y - s, x, y - s * 0.4); c.bezierCurveTo(x + s * 0.45, y - s, x + s, y - s * 0.3, x, y + s * 0.35); c.fill(); }
+function drawFx(c, list, now) {
+  list.forEach(f => {
+    const e = now - f.t0;
+    if (f.type === 'water') {
+      for (let k = 0; k < 12; k++) {
+        const p = e / 900 - k * 0.05; if (p < 0 || p > 1) continue;
+        const x = 64 + k * 6.5 + Math.sin(k) * 3, y = 30 + p * 128;
+        c.fillStyle = `rgba(80,150,220,${0.85 * (1 - p * 0.4)})`;
+        c.beginPath(); c.moveTo(x, y - 5); c.quadraticCurveTo(x + 3, y, x, y + 2); c.quadraticCurveTo(x - 3, y, x, y - 5); c.fill();
+      }
+    } else if (f.type === 'drain') {
+      for (let k = 0; k < 12; k++) {
+        const p = e / 900 - k * 0.04; if (p < 0 || p > 1) continue;
+        c.fillStyle = `rgba(80,150,220,${0.8 * (1 - p)})`; dot(c, 152 + p * 22 + (k % 3) * 2, 162 + p * p * 50 + (k % 4), 1.6);
+      }
+    } else if (f.type === 'fert') {
+      for (let k = 0; k < 16; k++) {
+        const p = e / 800 - k * 0.03; if (p < 0 || p > 1) continue;
+        c.fillStyle = k % 3 ? 'rgba(214,160,50,.95)' : 'rgba(255,240,180,.95)';
+        dot(c, 70 + (k * 23) % 60, 50 + p * 108, 1.6);
+      }
+    } else if (f.type === 'soil') {
+      const p = e / 700; if (p > 1) return;
+      for (let k = 0; k < 14; k++) { c.fillStyle = `rgba(110,75,45,${1 - p})`; dot(c, 58 + k * 6, BY - Math.sin(p * Math.PI) * (8 + (k % 4) * 4), 1.6); }
+    } else if (f.type === 'heart') {
+      for (let k = 0; k < 6; k++) {
+        const p = e / 1300 - k * 0.08; if (p < 0 || p > 1) continue;
+        c.fillStyle = `rgba(226,92,120,${1 - p})`; heart(c, 78 + k * 9 + Math.sin(p * 6 + k) * 4, 120 - p * 80, 5 + (k % 2) * 2);
+      }
+    } else if (f.type === 'notes') {
+      c.font = '15px serif'; c.textAlign = 'center';
+      for (let k = 0; k < 5; k++) {
+        const p = e / 2200 - k * 0.12; if (p < 0 || p > 1) continue;
+        c.fillStyle = `rgba(110,90,170,${1 - p})`; c.fillText(k % 2 ? '♪' : '♫', 60 + k * 20 + Math.sin(p * 8 + k) * 6, 130 - p * 100);
+      }
+    } else if (f.type === 'move') {
+      const p = e / 600; if (p > 1) return;
+      c.strokeStyle = `rgba(200,170,90,${1 - p})`; c.lineWidth = 2; c.beginPath(); c.arc(100, 140, 30 + p * 40, 0, TAU); c.stroke();
+    } else if (f.type === 'spark' || f.type === 'coins') {
+      const p = e / 1000; if (p > 1) return;
+      for (let k = 0; k < 10; k++) {
+        const a = k / 10 * TAU, d = 20 + p * 46, x = 100 + Math.cos(a) * d, y = (f.type === 'coins' ? 120 - p * 60 : 110) + Math.sin(a) * d * 0.6;
+        c.fillStyle = f.type === 'coins' ? `rgba(230,175,40,${1 - p})` : `rgba(255,210,90,${1 - p})`;
+        if (f.type === 'coins') dot(c, x, y, 3); else { c.save(); c.translate(x, y); c.rotate(p * 3); c.fillRect(-1.5, -1.5, 3, 3); c.restore(); }
+      }
+    }
+  });
+}
+
+function drawWeather(c, wx, now, seed) {
+  if (wx === '晴' || wx === '高温') {
+    const g = c.createRadialGradient(178, 18, 2, 178, 18, 60);
+    g.addColorStop(0, wx === '高温' ? 'rgba(255,190,90,.35)' : 'rgba(255,220,130,.25)'); g.addColorStop(1, 'rgba(255,220,130,0)');
+    c.fillStyle = g; c.fillRect(110, 0, 90, 80);
+    return;
+  }
+  if (reduce) return;
+  if (wx === '小雨' || wx === '雷阵雨') {
+    c.strokeStyle = 'rgba(110,150,200,.45)'; c.lineWidth = 0.9;
+    const n = wx === '小雨' ? 12 : 20, sp = wx === '小雨' ? 0.14 : 0.22;
+    for (let k = 0; k < n; k++) { const x = (k * 53 + seed * 31) % 210, y = ((now * sp) + k * 97 + seed * 13) % 240 - 20; c.beginPath(); c.moveTo(x, y); c.lineTo(x - 3, y + 10); c.stroke(); }
+  } else if (wx === '雪') {
+    c.fillStyle = 'rgba(255,255,255,.9)';
+    for (let k = 0; k < 16; k++) { const y = ((now * 0.025) + k * 61 + seed * 17) % 240 - 10, x = (k * 41 + seed * 7) % 200 + Math.sin(now / 1200 + k) * 6; dot(c, x, y, 1.6 + (k % 3) * 0.5); }
+  }
+}
+
+/* ================= rendering ================= */
+const canvases = [];
+function canvasFor(i) {
+  if (!canvases[i]) {
+    const cv = document.createElement('canvas');
+    cv.setAttribute('role', 'img');
+    cv.addEventListener('click', () => tap(i));
+    canvases[i] = cv;
+  }
+  return canvases[i];
+}
+function sizeCanvas(cv) {
+  const w = cv.clientWidth; if (!w) return;
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  const W = Math.round(w * dpr), H = Math.round(w * 1.1 * dpr);
+  if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
+}
+
+const ICON = {
+  water: '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3c3.5 4.4 6 7.6 6 10.6A6 6 0 0 1 6 13.6C6 10.6 8.5 7.4 12 3z" fill="var(--water)" fill-opacity=".25" stroke="var(--water)"/></svg>',
+  fert: '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linejoin="round"><path d="M7 8h10l-1 12H8L7 8z" stroke="var(--nutr)" fill="var(--nutr)" fill-opacity=".2"/><path d="M9 8c0-2 1.3-4 3-4s3 2 3 4" stroke="var(--nutr)"/><circle cx="12" cy="14" r="1.6" fill="var(--nutr)"/></svg>',
+  soil: '<svg viewBox="0 0 24 24" fill="none" stroke="var(--soil)" stroke-width="1.8" stroke-linecap="round"><path d="M12 3v9"/><path d="M7 12h10v3a5 5 0 0 1-10 0v-3z" fill="var(--soil)" fill-opacity=".2"/><path d="M4 21h16"/></svg>',
+  pet: '<svg viewBox="0 0 24 24" fill="none" stroke="var(--heart)" stroke-width="1.8" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="var(--heart)" fill-opacity=".2"/></svg>',
+  home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 11l8-7 8 7v9H4z" fill="currentColor" fill-opacity=".1"/><path d="M10 20v-5h4v5"/></svg>',
+  sun: '<svg viewBox="0 0 24 24" fill="none" stroke="var(--sun)" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4" fill="var(--sun)" fill-opacity=".25"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.4 1.4M17.6 17.6 19 19M5 19l1.4-1.4M17.6 6.4 19 5"/></svg>',
+  music: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/></svg>',
+  back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 7 4 12l5 5"/><path d="M4 12h11a5 5 0 0 1 0 10h-2"/></svg>',
+  drain: '<svg viewBox="0 0 24 24" fill="none" stroke="var(--water)" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><path d="M3 9l11-4 2.5 8.5L7 16z" fill="var(--water)" fill-opacity=".12"/><path d="M18 14c0 2 1.2 3 1.2 4a1.2 1.2 0 0 1-2.4 0c0-1 1.2-2 1.2-4z" fill="var(--water)"/></svg>',
+};
+
+function barHTML(cls, label, val, max, band, shown) {
+  const pct = clamp(val / max * 100, 0, 100);
+  const b = band ? `<span class="band" style="left:${band[0]}%;width:${band[1] - band[0]}%"></span>` : '';
+  return `<div class="bar ${cls}"><span>${label}</span><div class="track"><i style="width:${pct}%"></i>${b}</div><b>${shown ?? Math.round(val)}</b></div>`;
+}
+const ALERT_WX = ['小雨', '雷阵雨', '高温', '霜冻', '雪'];
+
+function render() {
+  const season = seasonOf(state.day);
+  document.body.dataset.season = season;
+  $('glyph').textContent = SEASONS[season];
+  $('date').textContent = `第${yearOf(state.day)}年 · ${SEASONS[season]} · 第${state.day % DAYS_PER_SEASON + 1}天`;
+  $('wx').textContent = `今天 ${state.weather} ${state.temp}°C`;
+  const fc = $('fc');
+  fc.textContent = `明天 ${state.forecast} ${state.ftemp}°C`;
+  fc.classList.toggle('alert', ALERT_WX.includes(state.forecast));
+  fc.title = state.forecast === '小雨' || state.forecast === '雷阵雨' ? '怕涝的植物可以提前搬进屋' : state.forecast === '霜冻' ? '不耐寒的植物今晚搬进屋' : '';
+  if (state.forecast === '霜冻') fc.textContent += ' · 怕冷的搬进屋';
+  $('gold').textContent = state.gold;
+  const used = state.pots.filter(Boolean).length;
+  $('slotinfo').textContent = `${used} / ${state.slots} 格`;
+  const ex = $('expand');
+  if (state.slots >= 10) { ex.textContent = '阳台已经最大'; ex.disabled = true; }
+  else { ex.textContent = `扩建 +2 格 · ${expandCost()} 金`; ex.disabled = state.gold < expandCost(); }
+
+  const grid = $('grid');
+  grid.replaceChildren();
+  state.pots.forEach((slot, i) => {
+    const card = document.createElement('article');
+    card.className = 'card';
+    if (!slot) {
+      card.classList.add('empty');
+      card.innerHTML = `<div class="slot-body"><strong>空位</strong><span>这里可以摆一个花盆</span><button class="ghost" data-go="pots">去买花盆</button></div>`;
+      grid.append(card); return;
+    }
+    if (i === emptyPotIndex() && !slot.plant) card.classList.add('target');
+    const wrap = document.createElement('div'); wrap.className = 'cv-wrap' + (slot.indoor ? ' in' : '');
+    const cv = canvasFor(i); wrap.append(cv);
+    const where = document.createElement('span'); where.className = 'where'; where.textContent = slot.indoor ? '室内' : '阳台'; wrap.append(where);
+    const info = document.createElement('div'); info.className = 'info';
+    if (!slot.plant) {
+      cv.setAttribute('aria-label', `空的${POTS[slot.type].name}`);
+      info.innerHTML = `<div class="name-row"><h3>空花盆</h3><span>${POTS[slot.type].name}</span></div>
+        <p class="status">${POTS[slot.type].desc}</p>
+        <div class="pair"><button class="wide" data-plant="${i}">种点什么</button><button class="wide soft" data-sellpot="${i}">卖掉 · ${potRefund(slot)} 金</button></div>`;
+    } else {
+      const pl = slot.plant, sp = SP[pl.sp], need = NEED[sp.need], lt = LIGHT[sp.light], I = idealOf(sp);
+      const stage = stageName(pl, sp), st = statusOf(slot);
+      cv.setAttribute('aria-label', `${sp.name}，${stage}`);
+      const chip = document.createElement('span');
+      chip.className = 'chip' + (pl.dead ? ' dead' : pl.matured ? ' ripe' : '');
+      chip.textContent = stage; wrap.append(chip);
+      const age = document.createElement('span'); age.className = 'age'; age.textContent = `第 ${pl.age + 1} 天`; wrap.append(age);
+      const gr = st.ev ? st.ev.grades : {}, cls = k => gr[k] ? ` off g${gr[k]}` : '';
+      const L = lightAt(slot.indoor, state.weather, seasonOf(state.day));
+      const bars = [
+        barHTML('water' + cls('water'), '水分', pl.water, 100, I.water),
+        barHTML('nutr' + cls('nutr'), '肥力', pl.nutr, 100, I.nutr),
+        barHTML('soil' + cls('soil'), '松软', pl.soil, 100, I.soil),
+        barHTML('light' + cls('light'), '光照', L, 100, I.light),
+        barHTML('heart', '健康', pl.health, 100),
+        barHTML('grow', '成长', pl.progress, 100, null, Math.floor(pl.progress) + '%'),
+      ].join('');
+      let tail;
+      if (pl.dead) tail = `<button class="wide soft" data-clear="${i}">铲掉枯株</button>`;
+      else {
+        const d = pl.done;
+        const b = (kind, icon, label, doneLabel, extra = '', dis = false) =>
+          `<button class="act" data-act="${kind}" data-i="${i}" ${d[kind] || dis ? 'disabled' : ''}>${icon}${d[kind] ? doneLabel : label}${extra}</button>`;
+        const open = menu && menu.i === i ? menu.kind : '';
+        const mbtn = (kind, icon, label, doneLabel, doneKey) => `<button class="act" data-menu="${kind}" data-i="${i}" ${d[doneKey] ? 'disabled' : ''} aria-expanded="${open === kind}">${icon}${d[doneKey] ? doneLabel : label}</button>`;
+        let row = '';
+        if (open === 'care' && !d.care) row = `<div class="care-row">
+            <button class="act" data-care="pet" data-i="${i}">${ICON.pet}摸一摸</button>
+            <button class="act" data-care="music" data-i="${i}">${ICON.music}听首歌</button>
+            <button class="act" data-menu="care" data-i="${i}">${ICON.back}算了</button></div>`;
+        if (open === 'fert' && !d.fert) row = `<div class="care-row fert">
+            <button class="act" data-act="fert" data-i="${i}" ${state.gold < FERT_COST ? 'disabled' : ''}>${ICON.fert}复合肥<span class="cost">${FERT_COST} 金 · +${FERT_ADD}</span></button>
+            <button class="act" data-act="freefert" data-i="${i}">${ICON.fert}自制堆肥<span class="cost">免费 · +0~${FREE_FERT_MAX}</span></button>
+            <button class="act" data-menu="fert" data-i="${i}">${ICON.back}算了</button></div>`;
+        tail = `<div class="acts">
+          ${b('water', ICON.water, '浇水', '浇过了')}
+          ${mbtn('fert', ICON.fert, '施肥', '施过了', 'fert')}
+          ${b('soil', ICON.soil, '松土', '松过了')}
+          ${mbtn('care', ICON.pet, '陪伴', '陪过了', 'care')}
+          ${b('move', slot.indoor ? ICON.sun : ICON.home, slot.indoor ? '搬到阳台' : '搬进屋', '今天搬过了')}
+          ${b('drain', ICON.drain, '倒积水', '倒过了', '', pl.water <= 30)}
+        </div>${row}` + (pl.matured ? `<button class="wide" data-sell="${i}">出售 · ${sellPrice(slot)} 金</button>` : '');
+      }
+      info.innerHTML = `<div class="name-row"><h3>${sp.name}</h3><span>${POTS[slot.type].name} · ${need.label} · ${lt.label}</span></div>
+        <div class="bars">${bars}</div>
+        <p class="status${st.bad ? ' bad' : ''}">${st.main}</p>${st.extra ? `<p class="status sub">${st.extra}</p>` : ''}${tail}`;
+    }
+    card.append(wrap, info);
+    grid.append(card);
+  });
+  requestAnimationFrame(() => canvases.forEach(cv => cv && cv.isConnected && sizeCanvas(cv)));
+
+  document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === state.tab)));
+  const lv = levelOf(state.xp);
+  $('lvname').textContent = `Lv.${lv.L} ${title(lv.L)}`;
+  $('xpfill').style.width = (lv.cur / lv.need * 100).toFixed(1) + '%';
+  $('xptxt').textContent = `经验 ${lv.cur} / ${lv.need}`;
+  $('owner').textContent = `${state.owner}的阳台`;
+  $('dexbtn').textContent = `图鉴 ${Object.keys(state.dex).length} / ${PLANTS.length}`;
+  $('shopmeta').textContent = `Lv.${lv.L} · 已解锁 ${PLANTS.filter(p => p.lv <= lv.L).length} 种`;
+  if (!$('dexbox').hidden) renderDex();
+  renderShop();
+  $('log').innerHTML = state.log.map(e => `<li><span>${yearOf(e.d) > 1 ? yearOf(e.d) + '年' : ''}${dayLabel(e.d)}</span><div>${e.t}</div></li>`).join('');
+}
+
+// how a plant bought today would grow: days to maturity and whether it lands in its showy season
+function plan(sp, day) {
+  let p = 0, d = day, n = 0, winter = false;
+  while (p < 100 && n < 300) { const se = seasonOf(d); if (se === 3) winter = true; p += 100 / sp.days * (sp.grow.includes(se) ? 1.15 : se === 3 ? 0.4 : 0.85); d++; n++; }
+  const ms = seasonOf(d);
+  const shows = sp.cat === 'tree' ? [...(sp.blossom ? sp.blossom.seasons : []), ...(sp.fruit ? sp.fruit.seasons : [])] : (sp.bloom || []);
+  const peak = !shows.length || shows.includes(ms);
+  const slow = n > Math.ceil(sp.days * 1.25);
+  return { days: n, ms, peak, shows, winter, slow, good: peak && !slow };
+}
+function planText(sp, pl) {
+  let t = `现在种约 ${pl.days} 天长成（${SEASONS[pl.ms]}季）`;
+  if (pl.shows.length) t += pl.peak ? '，正好赶上花期 / 果期，卖价更高。' : `，那时不在花期，要等到${pl.shows.map(x => SEASONS[x]).join('、')}季才好卖。`;
+  else t += pl.winter ? '，中途要过冬，会长得慢些。' : '。';
+  if (pl.slow) t = '这时候种长得慢。' + t;
+  return t;
+}
+function drawSpecimen(cv, sp, grey) {
+  const c = cv.getContext('2d'), k = cv.width / 200;
+  c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, cv.width, cv.height); c.setTransform(k, 0, 0, k, 0, 0);
+  const season = sp.show ?? (sp.bloom ? sp.bloom[0] : sp.id === 'foxtail' ? 2 : 1);
+  const demo = { sp: sp.id, id: PLANTS.indexOf(sp) + 3, progress: 100, health: 100, water: 60, nutr: 60, soil: 70, matured: true, dead: false };
+  drawPot(c, 'clay'); drawSoil(c, { type: 'clay' }, demo, ''); drawPlant(c, demo, sp, season, 0);
+  if (grey) {
+    c.setTransform(1, 0, 0, 1, 0, 0); c.globalCompositeOperation = 'source-in';
+    c.fillStyle = 'rgba(128,132,122,.55)'; c.fillRect(0, 0, cv.width, cv.height);
+    c.globalCompositeOperation = 'source-over';
+  }
+}
+let shopKey = '';
+function renderShop() {
+  const freeSlot = state.pots.findIndex(x => x === null) >= 0;
+  const potIdx = emptyPotIndex(), L = myLevel();
+  const key = [state.tab, state.gold, freeSlot, potIdx, state.day, L].join('|');
+  if (key === shopKey) return;
+  shopKey = key;
+  const items = $('items');
+  items.replaceChildren();
+  const hint = $('shophint');
+  if (state.tab === 'pots') {
+    hint.textContent = freeSlot ? '花盆会摆在阳台的第一个空位上。买多了也没关系，空花盆可以卖回来（没用过的原价退）。' : '阳台放满了，扩建之后才能再买花盆。';
+    Object.entries(POTS).forEach(([k, p]) => {
+      const el = document.createElement('div'); el.className = 'item';
+      const cv = document.createElement('canvas'); cv.width = 148; cv.height = 162;
+      el.innerHTML = `<div class="tx"><div class="t1"><strong>${p.name}</strong></div><p>${p.desc}</p>
+        <div class="t3"><button class="buy" data-buypot="${k}" ${!freeSlot || state.gold < p.price ? 'disabled' : ''}>${p.price} 金</button></div></div>`;
+      el.prepend(cv); items.append(el);
+      const c = cv.getContext('2d'); c.setTransform(148 / 200, 0, 0, 148 / 200, 0, -30); drawPot(c, k); drawSoil(c, { type: k }, null, '');
+    });
+    return;
+  }
+  const list = PLANTS.filter(p => p.cat === state.tab).map(sp => ({ sp, pl: plan(sp, state.day), locked: sp.lv > L }));
+  list.sort((a, b) => (a.locked - b.locked) || (b.pl.good - a.pl.good) || (a.sp.lv - b.sp.lv));
+  const recs = list.filter(x => !x.locked && x.pl.good).map(x => x.sp.name);
+  hint.textContent = (recs.length ? `${SEASONS[seasonOf(state.day)]}季推荐：${recs.join('、')}。` : `这一栏${SEASONS[seasonOf(state.day)]}季没有特别合适的，可以看看别的分类。`) +
+    (potIdx >= 0 ? ` 买下的幼苗会种进第 ${potIdx + 1} 格的空花盆。` : ' 还没有空花盆，先去“花盆”那一栏买一个。');
+  list.forEach(({ sp, pl, locked }) => {
+    const el = document.createElement('div'); el.className = 'item' + (locked ? ' locked' : '');
+    const cv = document.createElement('canvas'); cv.width = 148; cv.height = 162;
+    const I = idealOf(sp);
+    el.innerHTML = `<div class="tx"><div class="t1"><strong>${sp.name}</strong>${locked ? `<span class="tag lock">Lv.${sp.lv} 解锁</span>` : pl.good ? '<span class="tag rec">本季推荐</span>' : ''}<span class="tag">${NEED[sp.need].label}</span><span class="tag">${LIGHT[sp.light].label}</span></div>
+      <p>${sp.note}</p>
+      <p class="rng">水 ${I.water.join('–')} · 肥 ${I.nutr.join('–')} · 光 ${I.light.join('–')} · 长成得 ${sp.xp} 经验</p>
+      ${locked ? '' : `<p class="plan">${planText(sp, pl)}</p>`}
+      <div class="t3"><span>卖 ${sp.sell} 金起</span><button class="buy" data-buyplant="${sp.id}" ${locked || potIdx < 0 || state.gold < sp.price ? 'disabled' : ''}>${locked ? `Lv.${sp.lv}` : sp.price + ' 金'}</button></div></div>`;
+    el.prepend(cv); items.append(el);
+    drawSpecimen(cv, sp, locked);
+  });
+}
+
+/* ---------- name & collection dialogs ---------- */
+let lastFocus = null;
+function openBox(id) { lastFocus = document.activeElement; $(id).hidden = false; }
+function closeBox(id) { $(id).hidden = true; if (lastFocus && lastFocus.focus) lastFocus.focus(); }
+function openName() { $('ownerin').value = state.owner; openBox('namebox'); setTimeout(() => $('ownerin').select(), 30); }
+function saveName() {
+  const v = $('ownerin').value.replace(/[<>&"'`]/g, '').trim().slice(0, 10) || '清清';
+  const changed = state.named && v !== state.owner;
+  state.owner = v;
+  if (!state.named) addLog(`阳台的门牌挂上了：「${v}的阳台」。`);
+  else if (changed) addLog(`阳台改名叫「${v}的阳台」了。`);
+  state.named = true;
+  closeBox('namebox'); commit();
+}
+const CAT_NAME = { flower: '花卉', grass: '绿植·草', succ: '多肉', tree: '树木' };
+function renderDex() {
+  const g = $('dexgrid'), L = myLevel();
+  const n = Object.keys(state.dex).length;
+  $('dexmeta').textContent = `已养成 ${n} / ${PLANTS.length} 种`;
+  g.replaceChildren();
+  Object.entries(CAT_NAME).forEach(([cat, name]) => {
+    const list = PLANTS.filter(p => p.cat === cat);
+    const h = document.createElement('div'); h.className = 'dexcat';
+    h.textContent = `${name} ${list.filter(p => state.dex[p.id]).length} / ${list.length}`;
+    const grid = document.createElement('div'); grid.className = 'dexgrid';
+    list.forEach(sp => {
+      const got = +state.dex[sp.id] || 0;
+      const t = document.createElement('div'); t.className = 'dextile' + (got ? '' : ' no');
+      const cv = document.createElement('canvas'); cv.width = 192; cv.height = 211;
+      cv.setAttribute('role', 'img'); cv.setAttribute('aria-label', got ? sp.name : `${sp.name}（未养成）`);
+      t.append(cv);
+      t.insertAdjacentHTML('beforeend', `<strong>${sp.name}</strong><span>${got ? `养成 ${got} 次` : sp.lv > L ? `Lv.${sp.lv} 解锁` : '还没养成过'}</span>`);
+      grid.append(t);
+      drawSpecimen(cv, sp, !got);
+    });
+    g.append(h, grid);
+  });
+}
+function openDex() { renderDex(); openBox('dexbox'); $('dexclose').focus(); }
+
+/* ================= loop ================= */
+function frame(now) {
+  const season = seasonOf(state.day);
+  for (let i = 0; i < state.pots.length; i++) {
+    const slot = state.pots[i], cv = canvases[i];
+    if (!slot || !cv || !cv.isConnected || !cv.width) continue;
+    const c = cv.getContext('2d'), k = cv.width / 200;
+    c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, cv.width, cv.height); c.setTransform(k, 0, 0, k, 0, 0);
+    if (slot.indoor) drawWindow(c); else drawWeather(c, state.weather, now, i + 1);
+    drawPot(c, slot.type);
+    drawSoil(c, slot, slot.plant, state.weather);
+    if (slot.plant) {
+      const we = now - (wiggles[i] || -1e9), wig = we < 1200 ? Math.sin(we / 70) * 3 * (1 - we / 1200) : 0;
+      drawPlant(c, slot.plant, SP[slot.plant.sp], season, now, wig);
+    }
+    drawFx(c, fx.filter(f => f.i === i), now);
+  }
+  for (let j = fx.length - 1; j >= 0; j--) if (now - fx[j].t0 > 3000) fx.splice(j, 1);
+  requestAnimationFrame(frame);
+}
+
+/* ================= events ================= */
+document.addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.act) act(+b.dataset.i, b.dataset.act);
+  else if (b.dataset.sell) sell(+b.dataset.sell);
+  else if (b.dataset.sellpot) sellPot(+b.dataset.sellpot);
+  else if (b.dataset.clear) clearPlant(+b.dataset.clear);
+  else if (b.dataset.buypot) buyPot(b.dataset.buypot);
+  else if (b.dataset.buyplant) buyPlant(b.dataset.buyplant);
+  else if (b.dataset.plant) { state.target = +b.dataset.plant; if (state.tab === 'pots') state.tab = 'flower'; render(); $('shop').scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' }); }
+  else if (b.dataset.go) { state.tab = b.dataset.go; render(); $('shop').scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' }); }
+  else if (b.dataset.tab) { state.tab = b.dataset.tab; render(); }
+  else if (b.dataset.care) { care(+b.dataset.i, b.dataset.care); }
+  else if (b.dataset.menu) { const i = +b.dataset.i; menu = menu && menu.i === i && menu.kind === b.dataset.menu ? null : { i, kind: b.dataset.menu }; render(); }
+});
+$('next').addEventListener('click', nextDay);
+$('owner').addEventListener('click', openName);
+$('namego').addEventListener('click', saveName);
+$('ownerin').addEventListener('keydown', e => { if (e.key === 'Enter') saveName(); });
+$('dexbtn').addEventListener('click', openDex);
+$('dexclose').addEventListener('click', () => closeBox('dexbox'));
+$('dexbox').addEventListener('click', e => { if (e.target.id === 'dexbox') closeBox('dexbox'); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { if (!$('dexbox').hidden) closeBox('dexbox'); else if (!$('namebox').hidden && state.named) closeBox('namebox'); } });
+$('expand').addEventListener('click', expand);
+let resetArmed = 0;
+$('reset').addEventListener('click', () => {
+  const b = $('reset');
+  if (Date.now() - resetArmed < 3000) { state = freshState(); canvases.length = 0; shopKey = ''; b.textContent = '重新开始'; resetArmed = 0; commit(); toast('阳台清空了，500 金币重新出发。'); return; }
+  resetArmed = Date.now(); b.textContent = '再点一次确认清空';
+  setTimeout(() => { if (Date.now() - resetArmed >= 3000) b.textContent = '重新开始'; }, 3100);
+});
+new ResizeObserver(() => canvases.forEach(cv => cv && cv.isConnected && sizeCanvas(cv))).observe($('grid'));
+
+function start(data) {
+  state = migrate(data && typeof data.day === 'number' ? data : null) || load() || freshState();
+  render();
+  if (!state.named) openName();
+  requestAnimationFrame(frame);
+}
+window.claude?.hot?.snapshot?.(() => state);
+window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+})();
+</script>
+
+</body>
+</html>
