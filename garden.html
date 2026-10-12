@@ -108,6 +108,36 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .status.sub { color: var(--ink-soft); font-size: 12.5px; margin-top: -4px; }
 .care-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 6px; border-radius: 12px; background: color-mix(in oklab, var(--heart) 10%, var(--surface)); }
 .item p.rng { font-size: 11.5px; font-variant-numeric: tabular-nums; }
+.owner { font-family: var(--font-body); font-size: 13px; color: var(--ink-soft); letter-spacing: .1em; margin-left: 8px; border: 0; border-bottom: 1px dashed var(--ink-soft); background: none; padding: 0 0 1px; }
+.owner:hover { color: var(--ink); }
+.owner::after { content: " ✎"; font-size: 11px; }
+.lv { display: flex; align-items: center; gap: 10px; font-size: 13px; flex-wrap: wrap; }
+.lv b { font-weight: 600; letter-spacing: .04em; }
+.xpbar { width: min(220px, 40vw); height: 8px; border-radius: 8px; background: color-mix(in oklab, var(--accent) 18%, var(--surface)); overflow: hidden; }
+.xpbar i { display: block; height: 100%; background: var(--accent); border-radius: 8px; transition: width .5s; }
+.lv span { color: var(--ink-soft); font-variant-numeric: tabular-nums; font-size: 12px; }
+.dexbtn { padding: 7px 14px; }
+.care-row.fert { background: color-mix(in oklab, var(--nutr) 12%, var(--surface)); }
+.tag.rec { background: var(--accent); color: var(--surface); border-color: transparent; }
+.tag.lock { border-style: dashed; }
+.item.locked { opacity: .62; }
+.item p.plan { color: var(--ink); }
+.overlay { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 16px; background: color-mix(in oklab, var(--ink) 40%, transparent); }
+.overlay[hidden] { display: none; }
+.modal { width: 100%; max-width: 420px; max-height: 86vh; overflow-y: auto; background: var(--surface); border-radius: 18px; padding: 20px; display: grid; gap: 12px; border: 1px solid var(--line); }
+.modal.big { max-width: 920px; }
+.modal h2 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 24px; letter-spacing: .08em; }
+.modal p { margin: 0; color: var(--ink-soft); }
+.namerow { display: flex; align-items: center; gap: 8px; font-size: 18px; }
+.namerow input { flex: 1; min-width: 0; font: inherit; font-size: 18px; padding: 8px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); }
+.namerow input:focus-visible { outline: 2px solid var(--accent); }
+.dexcat { font-family: var(--font-display); font-size: 18px; letter-spacing: .08em; margin: 14px 0 8px; }
+.dexgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; }
+.dextile { border: 1px solid var(--line); border-radius: 12px; padding: 6px 6px 8px; display: grid; justify-items: center; gap: 2px; text-align: center; }
+.dextile canvas { width: 100%; max-width: 96px; aspect-ratio: 200 / 220; display: block; }
+.dextile strong { font-family: var(--font-display); font-weight: 400; font-size: 15px; letter-spacing: .05em; }
+.dextile span { font-size: 11px; color: var(--ink-soft); }
+.dextile.no strong { color: var(--ink-soft); }
 .guide summary { font-family: var(--font-display); font-size: 20px; letter-spacing: .08em; cursor: pointer; }
 .guide p { margin: 8px 0 0; font-size: 13px; color: var(--ink-soft); max-width: 65ch; }
 .guide b { color: var(--ink); }
@@ -182,12 +212,14 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   <header class="top">
     <div class="glyph" id="glyph" aria-hidden="true">春</div>
     <div class="when">
-      <h1>四季盆栽<small>清清的阳台</small></h1>
+      <h1>四季盆栽<button class="owner" id="owner" title="改名字">清清的阳台</button></h1>
       <div class="date"><span id="date">第1年 · 春 · 第1天</span><span class="wx" id="wx">今天 晴 16°C</span><span class="wx" id="fc">明天 晴</span></div>
+      <div class="lv"><b id="lvname">Lv.1 新手园丁</b><div class="xpbar" role="progressbar" aria-label="经验"><i id="xpfill"></i></div><span id="xptxt">0 / 30</span></div>
     </div>
     <div class="side-ctl">
       <div class="wallet"><span class="coin" aria-hidden="true"></span><span id="gold">500</span><small>金币</small></div>
       <div class="ctl-row">
+        <button class="ghost dexbtn" id="dexbtn">图鉴</button>
         <button class="next" id="next">睡一觉 · 下一天</button>
       </div>
     </div>
@@ -204,7 +236,7 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
     <aside class="side">
       <section class="panel" id="shop">
-        <div class="sec-head"><h2>花市</h2><span class="meta" id="dexinfo"></span></div>
+        <div class="sec-head"><h2>花市</h2><span class="meta" id="shopmeta"></span></div>
         <div class="tabs" role="tablist">
           <button role="tab" data-tab="pots" aria-selected="true">花盆</button>
           <button role="tab" data-tab="flower" aria-selected="false">花卉</button>
@@ -221,6 +253,8 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
         <p>每晚睡觉时结算一次：四项都在区间里，健康 <b>+5</b>；哪一项偏出去一点 <b>−2</b>，偏得多 <b>−6</b>，到极端（干透、积水、烧根）<b>−12</b>。多了少了都扣。耐旱的植物怕水多，喜湿的怕干，耐阴的怕晒，这几种情况扣得更重。</p>
         <p>霜冻会冻伤阳台上的植物：不耐寒的 −12，耐寒的 −4，屋里的不受影响。深秋（秋 5 日以后）开始可能下霜。</p>
         <p>每株每天可以陪伴一次（摸一摸或听首歌），健康随机 +3~8。卡片上的“今晚”一行会提前告诉你结算结果。</p>
+        <p>施肥每天一次，二选一：复合肥 8 金，肥力 +35；自制堆肥免费，肥力随机 +0~20，偶尔一点不涨。</p>
+        <p>每养成一株植物都有经验，长得越慢、越贵的植物经验越多。升级会解锁新的植物。花市会按当前季节标出“本季推荐”，并算好现在种下多久长成、能不能赶上花期。</p>
       </details>
       <section class="panel">
         <div class="sec-head"><h2>园艺日记</h2></div>
@@ -230,6 +264,20 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     </aside>
   </main>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="overlay" id="namebox" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="nametitle">
+      <h2 id="nametitle">给阳台起个名字</h2>
+      <p>这会写在阳台的门牌上，以后点标题旁边的名字还能再改。</p>
+      <label class="namerow" for="ownerin"><input id="ownerin" maxlength="10" placeholder="清清" autocomplete="off"><span>的阳台</span></label>
+      <button class="wide" id="namego">就叫这个</button>
+    </div>
+  </div>
+  <div class="overlay" id="dexbox" hidden>
+    <div class="modal big" role="dialog" aria-modal="true" aria-labelledby="dextitle">
+      <div class="sec-head"><h2 id="dextitle">全图鉴</h2><span class="meta" id="dexmeta"></span><button class="ghost push" id="dexclose">关闭</button></div>
+      <div id="dexgrid"></div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -267,7 +315,7 @@ const PENALTY = [0, 2, 6, 12];
 const WX_LIGHT = { '晴': 85, '多云': 55, '小雨': 30, '雷阵雨': 20, '高温': 100, '雪': 35, '霜冻': 75 };
 const SEASON_LIGHT = [0, 5, 0, -10];
 const SEASON_DRY = [1, 1.3, 1.1, 0.6];
-const WATER_DECAY = 12, WATER_ADD = 20, DRAIN = 30, FERT_ADD = 30, SOIL_ADD = 35, FERT_COST = 8;
+const WATER_DECAY = 12, WATER_ADD = 20, DRAIN = 30, FERT_ADD = 35, FREE_FERT_MAX = 20, SOIL_ADD = 35, FERT_COST = 8;
 const HEAVY_FEEDERS = ['rose', 'sunflower', 'hydrangea', 'peach', 'lemon'];
 const LIGHT_FEEDERS = ['lavender', 'foxtail', 'snake', 'podocarpus'];
 
@@ -319,6 +367,19 @@ const PLANTS = [
   { id: 'pomegranate', name: '石榴', cat: 'tree', form: 'tree', shape: 'round', lf: 'narrow', bark: [20, 22, 30], leaves: [[90, 45, 45], [105, 45, 33], [45, 75, 50], null], blossom: { color: [8, 80, 52], seasons: [1] }, fruit: { color: [355, 65, 45], seasons: [2], kind: 'pom' }, price: 230, sell: 680, days: 32, need: 'low', light: 'sun', grow: [1, 2], hardy: true, show: 2, note: '夏天开火红的花，秋天结出咧嘴笑的石榴。' },
 ];
 PLANTS.forEach(p => { p.feed = HEAVY_FEEDERS.includes(p.id) ? 'heavy' : (p.cat === 'succ' || LIGHT_FEEDERS.includes(p.id)) ? 'light' : 'normal'; });
+const UNLOCK = {
+  catgrass: 1, foxtail: 1, mint: 1, sunflower: 1, cactusball: 1, pennywort: 1, hyacinth: 1,
+  tulip: 2, mimosa: 2, spider: 2, opuntia: 2, aloe: 2, echeveria: 2, rose: 2,
+  jasmine: 3, lavender: 3, fern: 3, snake: 3, haworthia: 3, bearpaw: 3,
+  gardenia: 4, lithops: 4, jade: 4, hydrangea: 4, peach: 4,
+  lemon: 5, pomegranate: 5, sakura: 5, osmanthus: 6, maple: 6, ginkgo: 7, podocarpus: 7,
+};
+// experience for growing one to maturity: slower and pricier plants are worth more
+PLANTS.forEach(p => { p.lv = UNLOCK[p.id] || 1; p.xp = Math.round(p.days * 2 + p.price / 8); });
+const TITLES = ['新手园丁', '见习园丁', '园丁', '资深园丁', '花匠', '园艺师', '园艺大师', '花园主人'];
+const title = L => TITLES[Math.min(L, TITLES.length) - 1];
+function levelOf(total) { let L = 1, need = 30, cur = total; while (cur >= need) { cur -= need; L++; need = 30 + (L - 1) * 25; } return { L, cur, need }; }
+const myLevel = () => levelOf(state.xp).L;
 const SP = Object.fromEntries(PLANTS.map(p => [p.id, p]));
 const idealOf = sp => ({ water: NEED[sp.need].range, nutr: FEED[sp.feed].range, soil: SOIL_RANGE, light: LIGHT[sp.light].range });
 const mid = r => Math.round((r[0] + r[1]) / 2);
@@ -345,8 +406,8 @@ let state;
 function freshState() {
   return {
     day: 0, gold: 500, slots: 4, pots: [null, null, null, null],
-    weather: '晴', temp: 16, forecast: '多云', ftemp: 15, seq: 1, dex: {},
-    log: [{ d: 0, t: '欢迎来到清清的阳台。先去花市挑一个花盆，再挑一株幼苗吧。' }],
+    weather: '晴', temp: 16, forecast: '多云', ftemp: 15, seq: 1, dex: {}, xp: 0, owner: '清清', named: false,
+    log: [{ d: 0, t: '欢迎来到你的小阳台。先去花市挑一个花盆，再挑一株幼苗吧。' }],
     tab: 'pots', target: -1,
   };
 }
@@ -355,6 +416,8 @@ function migrate(s) {
   s.forecast = s.forecast || '晴'; s.ftemp = s.ftemp ?? 16;
   s.pots = s.pots.map(p => p && { type: p.type, indoor: !!p.indoor, used: p.used ?? !!p.plant, plant: p.plant && SP[p.plant.sp] ? { ...p.plant } : null });
   delete s.speed; delete s.clock;
+  s.owner = s.owner || '清清'; s.named = !!s.named;
+  if (typeof s.xp !== 'number') s.xp = Object.keys(s.dex || {}).reduce((a, id) => a + (SP[id] ? SP[id].xp * (+s.dex[id] || 1) : 0), 0);
   return s;
 }
 function save() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(state)); } catch (e) {} }
@@ -505,6 +568,7 @@ function emptyPotIndex() {
 }
 function buyPlant(id) {
   const sp = SP[id];
+  if (sp.lv > myLevel()) return toast(`${sp.name}要到 Lv.${sp.lv} 才能种。`);
   const idx = emptyPotIndex();
   if (idx < 0) return toast('没有空花盆了，先买一个花盆。');
   if (state.gold < sp.price) return toast('金币不够。');
@@ -522,8 +586,9 @@ function buyPlant(id) {
 }
 function act(i, kind) {
   const slot = state.pots[i]; if (!slot || !slot.plant) return;
-  const pl = slot.plant, sp = SP[pl.sp];
-  if (pl.dead || pl.done[kind]) return;
+  const pl = slot.plant, sp = SP[pl.sp], slotKind = kind === 'freefert' ? 'fert' : kind;
+  menu = null;
+  if (pl.dead || pl.done[slotKind]) return render();
   if (kind === 'water') {
     pl.water = Math.min(130, pl.water + WATER_ADD);
     if (pl.water > 100) toast(`${sp.name}的盆土已经很湿了，水漫出来了……`);
@@ -531,7 +596,11 @@ function act(i, kind) {
     if (state.gold < FERT_COST) return toast('买肥料的钱都不够了。');
     state.gold -= FERT_COST;
     pl.nutr = Math.min(130, pl.nutr + FERT_ADD);
-    if (pl.nutr > 100) toast('肥料下得太猛了。');
+    toast(pl.nutr > 100 ? '肥料下得太猛了。' : `施了一包复合肥，肥力 +${FERT_ADD}。`);
+  } else if (kind === 'freefert') {
+    const add = Math.random() < 0.2 ? 0 : 1 + Math.floor(Math.random() * FREE_FERT_MAX);
+    pl.nutr = Math.min(130, pl.nutr + add);
+    toast(add ? `撒了一把自制堆肥，肥力 +${add}。` : '这把堆肥还没腐熟，肥力一点没涨。');
   } else if (kind === 'soil') {
     pl.soil = Math.min(100, pl.soil + SOIL_ADD);
     if (pl.soil > SOIL_RANGE[1]) toast('土本来就挺松的，再松会碰伤细根。');
@@ -543,11 +612,11 @@ function act(i, kind) {
     slot.indoor = !slot.indoor;
     toast(slot.indoor ? `${sp.name}搬进屋了。不淋雨不挨冻，但光线弱一些。` : `${sp.name}搬回阳台，晒得到太阳了。`);
   }
-  pl.done[kind] = true;
-  addFx(i, kind);
+  pl.done[slotKind] = true;
+  addFx(i, slotKind);
   commit();
 }
-let careOpen = -1;
+let menu = null; // { i, kind: 'care' | 'fert' } — the open choice row on a card
 function tap(i) {
   const slot = state.pots[i]; if (!slot || !slot.plant) return;
   if (slot.plant.sp === 'mimosa') slot.plant.touched = performance.now();
@@ -556,7 +625,7 @@ function tap(i) {
 function care(i, kind) {
   const slot = state.pots[i]; if (!slot || !slot.plant) return;
   const pl = slot.plant, sp = SP[pl.sp];
-  careOpen = -1;
+  menu = null;
   if (pl.dead || pl.done.care) return render();
   const gain = 3 + Math.floor(Math.random() * 6), before = pl.health;
   pl.health = Math.min(100, pl.health + gain);
@@ -650,9 +719,15 @@ function nextDay() {
       pl.progress = Math.min(100, pl.progress + g);
       if (pl.progress >= 100) {
         pl.matured = true;
-        const first = !state.dex[sp.id];
-        state.dex[sp.id] = true;
-        notes.push(`${sp.name}长大了！${first ? '图鉴新解锁。' : ''}`);
+        const first = !state.dex[sp.id], before = myLevel();
+        state.dex[sp.id] = (+state.dex[sp.id] || 0) + 1;
+        state.xp += sp.xp;
+        notes.push(`${sp.name}长大了！经验 +${sp.xp}${first ? '，图鉴新解锁' : ''}。`);
+        const after = myLevel();
+        if (after > before) {
+          const un = PLANTS.filter(x => x.lv > before && x.lv <= after).map(x => x.name);
+          notes.push(`升到 Lv.${after} ${title(after)}！${un.length ? '新解锁：' + un.join('、') + '。' : ''}`);
+        }
       }
     }
     pl.age++;
@@ -663,7 +738,7 @@ function nextDay() {
     pl.done = {};
   });
   state.day++;
-  careOpen = -1;
+  menu = null;
   const ns = seasonOf(state.day);
   if (ns !== season) { notes.unshift(SEASON_TIPS[ns]); if (ns === 0) notes.unshift(`新的一年，第 ${yearOf(state.day)} 年开始了。`); }
   state.weather = state.forecast; state.temp = state.ftemp;
@@ -1649,19 +1724,25 @@ function render() {
         const d = pl.done;
         const b = (kind, icon, label, doneLabel, extra = '', dis = false) =>
           `<button class="act" data-act="${kind}" data-i="${i}" ${d[kind] || dis ? 'disabled' : ''}>${icon}${d[kind] ? doneLabel : label}${extra}</button>`;
-        const careBtn = `<button class="act" data-careopen="${i}" ${d.care ? 'disabled' : ''} aria-expanded="${careOpen === i}">${ICON.pet}${d.care ? '陪过了' : '陪伴'}</button>`;
-        const careRow = careOpen === i && !d.care ? `<div class="care-row">
+        const open = menu && menu.i === i ? menu.kind : '';
+        const mbtn = (kind, icon, label, doneLabel, doneKey) => `<button class="act" data-menu="${kind}" data-i="${i}" ${d[doneKey] ? 'disabled' : ''} aria-expanded="${open === kind}">${icon}${d[doneKey] ? doneLabel : label}</button>`;
+        let row = '';
+        if (open === 'care' && !d.care) row = `<div class="care-row">
             <button class="act" data-care="pet" data-i="${i}">${ICON.pet}摸一摸</button>
             <button class="act" data-care="music" data-i="${i}">${ICON.music}听首歌</button>
-            <button class="act" data-careopen="${i}">${ICON.back}算了</button></div>` : '';
+            <button class="act" data-menu="care" data-i="${i}">${ICON.back}算了</button></div>`;
+        if (open === 'fert' && !d.fert) row = `<div class="care-row fert">
+            <button class="act" data-act="fert" data-i="${i}" ${state.gold < FERT_COST ? 'disabled' : ''}>${ICON.fert}复合肥<span class="cost">${FERT_COST} 金 · +${FERT_ADD}</span></button>
+            <button class="act" data-act="freefert" data-i="${i}">${ICON.fert}自制堆肥<span class="cost">免费 · +0~${FREE_FERT_MAX}</span></button>
+            <button class="act" data-menu="fert" data-i="${i}">${ICON.back}算了</button></div>`;
         tail = `<div class="acts">
           ${b('water', ICON.water, '浇水', '浇过了')}
-          ${b('fert', ICON.fert, '施肥', '施过了', d.fert ? '' : `<span class="cost">${FERT_COST} 金</span>`, state.gold < FERT_COST)}
+          ${mbtn('fert', ICON.fert, '施肥', '施过了', 'fert')}
           ${b('soil', ICON.soil, '松土', '松过了')}
-          ${careBtn}
+          ${mbtn('care', ICON.pet, '陪伴', '陪过了', 'care')}
           ${b('move', slot.indoor ? ICON.sun : ICON.home, slot.indoor ? '搬到阳台' : '搬进屋', '今天搬过了')}
           ${b('drain', ICON.drain, '倒积水', '倒过了', '', pl.water <= 30)}
-        </div>${careRow}` + (pl.matured ? `<button class="wide" data-sell="${i}">出售 · ${sellPrice(slot)} 金</button>` : '');
+        </div>${row}` + (pl.matured ? `<button class="wide" data-sell="${i}">出售 · ${sellPrice(slot)} 金</button>` : '');
       }
       info.innerHTML = `<div class="name-row"><h3>${sp.name}</h3><span>${POTS[slot.type].name} · ${need.label} · ${lt.label}</span></div>
         <div class="bars">${bars}</div>
@@ -1673,16 +1754,52 @@ function render() {
   requestAnimationFrame(() => canvases.forEach(cv => cv && cv.isConnected && sizeCanvas(cv)));
 
   document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === state.tab)));
-  $('dexinfo').textContent = `图鉴 ${Object.keys(state.dex).length} / ${PLANTS.length}`;
+  const lv = levelOf(state.xp);
+  $('lvname').textContent = `Lv.${lv.L} ${title(lv.L)}`;
+  $('xpfill').style.width = (lv.cur / lv.need * 100).toFixed(1) + '%';
+  $('xptxt').textContent = `经验 ${lv.cur} / ${lv.need}`;
+  $('owner').textContent = `${state.owner}的阳台`;
+  $('dexbtn').textContent = `图鉴 ${Object.keys(state.dex).length} / ${PLANTS.length}`;
+  $('shopmeta').textContent = `Lv.${lv.L} · 已解锁 ${PLANTS.filter(p => p.lv <= lv.L).length} 种`;
+  if (!$('dexbox').hidden) renderDex();
   renderShop();
   $('log').innerHTML = state.log.map(e => `<li><span>${yearOf(e.d) > 1 ? yearOf(e.d) + '年' : ''}${dayLabel(e.d)}</span><div>${e.t}</div></li>`).join('');
 }
 
+// how a plant bought today would grow: days to maturity and whether it lands in its showy season
+function plan(sp, day) {
+  let p = 0, d = day, n = 0, winter = false;
+  while (p < 100 && n < 300) { const se = seasonOf(d); if (se === 3) winter = true; p += 100 / sp.days * (sp.grow.includes(se) ? 1.15 : se === 3 ? 0.4 : 0.85); d++; n++; }
+  const ms = seasonOf(d);
+  const shows = sp.cat === 'tree' ? [...(sp.blossom ? sp.blossom.seasons : []), ...(sp.fruit ? sp.fruit.seasons : [])] : (sp.bloom || []);
+  const peak = !shows.length || shows.includes(ms);
+  const slow = n > Math.ceil(sp.days * 1.25);
+  return { days: n, ms, peak, shows, winter, slow, good: peak && !slow };
+}
+function planText(sp, pl) {
+  let t = `现在种约 ${pl.days} 天长成（${SEASONS[pl.ms]}季）`;
+  if (pl.shows.length) t += pl.peak ? '，正好赶上花期 / 果期，卖价更高。' : `，那时不在花期，要等到${pl.shows.map(x => SEASONS[x]).join('、')}季才好卖。`;
+  else t += pl.winter ? '，中途要过冬，会长得慢些。' : '。';
+  if (pl.slow) t = '这时候种长得慢。' + t;
+  return t;
+}
+function drawSpecimen(cv, sp, grey) {
+  const c = cv.getContext('2d'), k = cv.width / 200;
+  c.setTransform(1, 0, 0, 1, 0, 0); c.clearRect(0, 0, cv.width, cv.height); c.setTransform(k, 0, 0, k, 0, 0);
+  const season = sp.show ?? (sp.bloom ? sp.bloom[0] : sp.id === 'foxtail' ? 2 : 1);
+  const demo = { sp: sp.id, id: PLANTS.indexOf(sp) + 3, progress: 100, health: 100, water: 60, nutr: 60, soil: 70, matured: true, dead: false };
+  drawPot(c, 'clay'); drawSoil(c, { type: 'clay' }, demo, ''); drawPlant(c, demo, sp, season, 0);
+  if (grey) {
+    c.setTransform(1, 0, 0, 1, 0, 0); c.globalCompositeOperation = 'source-in';
+    c.fillStyle = 'rgba(128,132,122,.55)'; c.fillRect(0, 0, cv.width, cv.height);
+    c.globalCompositeOperation = 'source-over';
+  }
+}
 let shopKey = '';
 function renderShop() {
   const freeSlot = state.pots.findIndex(x => x === null) >= 0;
-  const potIdx = emptyPotIndex();
-  const key = [state.tab, state.gold, freeSlot, potIdx, Object.keys(state.dex).join()].join('|');
+  const potIdx = emptyPotIndex(), L = myLevel();
+  const key = [state.tab, state.gold, freeSlot, potIdx, state.day, L].join('|');
   if (key === shopKey) return;
   shopKey = key;
   const items = $('items');
@@ -1700,21 +1817,64 @@ function renderShop() {
     });
     return;
   }
-  hint.textContent = potIdx >= 0 ? `买下的幼苗会种进阳台第 ${potIdx + 1} 格的空花盆。` : '还没有空花盆，先去“花盆”那一栏买一个。';
-  PLANTS.filter(p => p.cat === state.tab).forEach(sp => {
-    const el = document.createElement('div'); el.className = 'item';
+  const list = PLANTS.filter(p => p.cat === state.tab).map(sp => ({ sp, pl: plan(sp, state.day), locked: sp.lv > L }));
+  list.sort((a, b) => (a.locked - b.locked) || (b.pl.good - a.pl.good) || (a.sp.lv - b.sp.lv));
+  const recs = list.filter(x => !x.locked && x.pl.good).map(x => x.sp.name);
+  hint.textContent = (recs.length ? `${SEASONS[seasonOf(state.day)]}季推荐：${recs.join('、')}。` : `这一栏${SEASONS[seasonOf(state.day)]}季没有特别合适的，可以看看别的分类。`) +
+    (potIdx >= 0 ? ` 买下的幼苗会种进第 ${potIdx + 1} 格的空花盆。` : ' 还没有空花盆，先去“花盆”那一栏买一个。');
+  list.forEach(({ sp, pl, locked }) => {
+    const el = document.createElement('div'); el.className = 'item' + (locked ? ' locked' : '');
     const cv = document.createElement('canvas'); cv.width = 148; cv.height = 162;
-    el.innerHTML = `<div class="tx"><div class="t1"><strong>${sp.name}</strong><span class="tag">${NEED[sp.need].label}</span><span class="tag">${LIGHT[sp.light].label}</span>${state.dex[sp.id] ? '<span class="tag got">已养成</span>' : ''}</div>
+    const I = idealOf(sp);
+    el.innerHTML = `<div class="tx"><div class="t1"><strong>${sp.name}</strong>${locked ? `<span class="tag lock">Lv.${sp.lv} 解锁</span>` : pl.good ? '<span class="tag rec">本季推荐</span>' : ''}<span class="tag">${NEED[sp.need].label}</span><span class="tag">${LIGHT[sp.light].label}</span></div>
       <p>${sp.note}</p>
-      <p class="rng">${(() => { const I = idealOf(sp); return `水 ${I.water.join('–')} · 肥 ${I.nutr.join('–')} · 光 ${I.light.join('–')}`; })()}</p>
-      <div class="t3"><span>约 ${sp.days} 天长成 · 卖 ${sp.sell} 金起</span><button class="buy" data-buyplant="${sp.id}" ${potIdx < 0 || state.gold < sp.price ? 'disabled' : ''}>${sp.price} 金</button></div></div>`;
+      <p class="rng">水 ${I.water.join('–')} · 肥 ${I.nutr.join('–')} · 光 ${I.light.join('–')} · 长成得 ${sp.xp} 经验</p>
+      ${locked ? '' : `<p class="plan">${planText(sp, pl)}</p>`}
+      <div class="t3"><span>卖 ${sp.sell} 金起</span><button class="buy" data-buyplant="${sp.id}" ${locked || potIdx < 0 || state.gold < sp.price ? 'disabled' : ''}>${locked ? `Lv.${sp.lv}` : sp.price + ' 金'}</button></div></div>`;
     el.prepend(cv); items.append(el);
-    const season = sp.show ?? (sp.bloom ? sp.bloom[0] : sp.id === 'foxtail' ? 2 : 1);
-    const demo = { sp: sp.id, id: PLANTS.indexOf(sp) + 3, progress: 100, health: 100, water: 60, nutr: 60, soil: 70, matured: true, dead: false };
-    const c = cv.getContext('2d'); c.setTransform(148 / 200, 0, 0, 148 / 200, 0, 0);
-    drawPot(c, 'clay'); drawSoil(c, { type: 'clay' }, demo, ''); drawPlant(c, demo, sp, season, 0);
+    drawSpecimen(cv, sp, locked);
   });
 }
+
+/* ---------- name & collection dialogs ---------- */
+let lastFocus = null;
+function openBox(id) { lastFocus = document.activeElement; $(id).hidden = false; }
+function closeBox(id) { $(id).hidden = true; if (lastFocus && lastFocus.focus) lastFocus.focus(); }
+function openName() { $('ownerin').value = state.owner; openBox('namebox'); setTimeout(() => $('ownerin').select(), 30); }
+function saveName() {
+  const v = $('ownerin').value.replace(/[<>&"'`]/g, '').trim().slice(0, 10) || '清清';
+  const changed = state.named && v !== state.owner;
+  state.owner = v;
+  if (!state.named) addLog(`阳台的门牌挂上了：「${v}的阳台」。`);
+  else if (changed) addLog(`阳台改名叫「${v}的阳台」了。`);
+  state.named = true;
+  closeBox('namebox'); commit();
+}
+const CAT_NAME = { flower: '花卉', grass: '绿植·草', succ: '多肉', tree: '树木' };
+function renderDex() {
+  const g = $('dexgrid'), L = myLevel();
+  const n = Object.keys(state.dex).length;
+  $('dexmeta').textContent = `已养成 ${n} / ${PLANTS.length} 种`;
+  g.replaceChildren();
+  Object.entries(CAT_NAME).forEach(([cat, name]) => {
+    const list = PLANTS.filter(p => p.cat === cat);
+    const h = document.createElement('div'); h.className = 'dexcat';
+    h.textContent = `${name} ${list.filter(p => state.dex[p.id]).length} / ${list.length}`;
+    const grid = document.createElement('div'); grid.className = 'dexgrid';
+    list.forEach(sp => {
+      const got = +state.dex[sp.id] || 0;
+      const t = document.createElement('div'); t.className = 'dextile' + (got ? '' : ' no');
+      const cv = document.createElement('canvas'); cv.width = 192; cv.height = 211;
+      cv.setAttribute('role', 'img'); cv.setAttribute('aria-label', got ? sp.name : `${sp.name}（未养成）`);
+      t.append(cv);
+      t.insertAdjacentHTML('beforeend', `<strong>${sp.name}</strong><span>${got ? `养成 ${got} 次` : sp.lv > L ? `Lv.${sp.lv} 解锁` : '还没养成过'}</span>`);
+      grid.append(t);
+      drawSpecimen(cv, sp, !got);
+    });
+    g.append(h, grid);
+  });
+}
+function openDex() { renderDex(); openBox('dexbox'); $('dexclose').focus(); }
 
 /* ================= loop ================= */
 function frame(now) {
@@ -1750,9 +1910,16 @@ document.addEventListener('click', e => {
   else if (b.dataset.go) { state.tab = b.dataset.go; render(); $('shop').scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' }); }
   else if (b.dataset.tab) { state.tab = b.dataset.tab; render(); }
   else if (b.dataset.care) { care(+b.dataset.i, b.dataset.care); }
-  else if (b.dataset.careopen) { careOpen = careOpen === +b.dataset.careopen ? -1 : +b.dataset.careopen; render(); }
+  else if (b.dataset.menu) { const i = +b.dataset.i; menu = menu && menu.i === i && menu.kind === b.dataset.menu ? null : { i, kind: b.dataset.menu }; render(); }
 });
 $('next').addEventListener('click', nextDay);
+$('owner').addEventListener('click', openName);
+$('namego').addEventListener('click', saveName);
+$('ownerin').addEventListener('keydown', e => { if (e.key === 'Enter') saveName(); });
+$('dexbtn').addEventListener('click', openDex);
+$('dexclose').addEventListener('click', () => closeBox('dexbox'));
+$('dexbox').addEventListener('click', e => { if (e.target.id === 'dexbox') closeBox('dexbox'); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { if (!$('dexbox').hidden) closeBox('dexbox'); else if (!$('namebox').hidden && state.named) closeBox('namebox'); } });
 $('expand').addEventListener('click', expand);
 let resetArmed = 0;
 $('reset').addEventListener('click', () => {
@@ -1766,6 +1933,7 @@ new ResizeObserver(() => canvases.forEach(cv => cv && cv.isConnected && sizeCanv
 function start(data) {
   state = migrate(data && typeof data.day === 'number' ? data : null) || load() || freshState();
   render();
+  if (!state.named) openName();
   requestAnimationFrame(frame);
 }
 window.claude?.hot?.snapshot?.(() => state);
